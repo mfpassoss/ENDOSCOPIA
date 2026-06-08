@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulário de Admissão</title>
+<meta name="description" content="Preencha sua ficha de admissão antes do exame de endoscopia. Rápido, seguro e pelo celular.">
+<!-- Open Graph (WhatsApp, Facebook, etc.) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Formulário de Admissão">
+<meta property="og:description" content="Preencha sua ficha antes do exame. Rápido, seguro e pelo celular.">
+<meta property="og:image" content="https://resonant-crostata-d4648a.netlify.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://resonant-crostata-d4648a.netlify.app/">
+<meta property="og:site_name" content="Clínica de Endoscopia">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Formulário de Admissão">
+<meta name="twitter:description" content="Preencha sua ficha antes do exame. Rápido, seguro e pelo celular.">
+<meta name="twitter:image" content="https://resonant-crostata-d4648a.netlify.app/og-image.png">
+<style>
+:root{
+  --navy:#0B2545;--teal:#1B6CA8;--green:#2E7D32;--warn:#E65100;
+  --danger:#C62828;--bg:#F4F7FB;--card:#fff;--border:#DDE4EE;
+  --muted:#7B8FAB;--text:#1C2B3A;--accent:#00B4A0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:40px}
+.header{background:linear-gradient(140deg,var(--navy) 0%,#1B4F8A 55%,var(--teal) 100%);padding:32px 24px 26px;text-align:center}
+.header-logo{font-size:34px;margin-bottom:8px}
+.header h1{color:#fff;font-size:21px;font-weight:800;line-height:1.25;margin-bottom:6px}
+.header p{color:rgba(255,255,255,0.65);font-size:13px}
+.progress-wrap{background:var(--navy);padding:10px 20px 12px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px}
+.progress-bar{height:4px;background:rgba(255,255,255,0.12);border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#4DD9CE);border-radius:10px;transition:width 0.4s;width:0%}
+.card{background:var(--card);border-radius:18px;margin:14px 16px;box-shadow:0 2px 12px rgba(11,37,69,0.07);border:1.5px solid var(--border);overflow:hidden}
+.card-header{padding:14px 18px 12px;border-bottom:1.5px solid var(--border)}
+.card-header .step{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--teal);margin-bottom:4px}
+.card-header h2{font-size:16px;font-weight:800;color:var(--navy)}
+.card-header p{font-size:12px;color:var(--muted);margin-top:2px}
+.card-body{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px}
+.field input[type=text],.field input[type=tel],.field input[type=date],.field textarea{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-family:inherit;font-size:15px;color:var(--text);background:#FAFCFF;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.field input:focus,.field textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(27,108,168,0.12);background:#fff}
+.field textarea{resize:vertical;min-height:64px}
+.field-row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.req{color:var(--danger)}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+.btn-group input[type=radio]{display:none}
+.btn-group label{flex:1;min-width:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;border:2px solid var(--border);border-radius:14px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.18s;background:#FAFCFF;text-align:center}
+.btn-group label .bi{font-size:22px;line-height:1}
+.btn-group input.yes:checked+label{background:#E8F5E9;border-color:#43A047;color:#2E7D32}
+.btn-group input.no:checked+label{background:#F3F4F6;border-color:#90A4AE;color:#455A64}
+.btn-group input.warn:checked+label{background:#FFF8E1;border-color:#FFA726;color:#BF360C}
+.btn-group input.danger:checked+label{background:#FFEBEE;border-color:#EF5350;color:#B71C1C}
+.exam-group{display:flex;gap:10px}
+.exam-group input[type=radio]{display:none}
+.exam-group label{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 8px;border:2px solid var(--border);border-radius:16px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.18s;background:#FAFCFF;text-align:center}
+.exam-group label .ei{font-size:26px}
+.exam-group input:checked+label{background:#E3F2FD;border-color:#1B6CA8;color:#0B2545}
+.conv-group{display:flex;flex-wrap:wrap;gap:8px}
+.conv-group input[type=radio]{display:none}
+.conv-group label{padding:9px 16px;border:1.5px solid var(--border);border-radius:30px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.18s;background:#FAFCFF}
+.conv-group input:checked+label{background:var(--teal);border-color:var(--teal);color:#fff}
+.detail-box{display:none;background:#F8FAFF;border:1.5px solid var(--border);border-radius:12px;padding:12px;flex-direction:column;gap:10px;margin-top:4px}
+.detail-box.show{display:flex}
+.detail-box.warn-box{background:#FFF8E1;border-color:#FFA726}
+.detail-box.danger-box{background:#FFEBEE;border-color:#EF5350}
+.ibox-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.ibox-input{border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:14px;background:#fff;width:100%;outline:none;resize:vertical}
+.tag-group{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all 0.18s;user-select:none}
+.tag.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.foto-area{border:2px dashed var(--border);border-radius:14px;padding:18px;text-align:center;background:#FAFCFF;cursor:pointer;transition:border-color 0.2s}
+.foto-area input[type=file]{display:none}
+.foto-icon{font-size:30px;margin-bottom:6px}
+.foto-area p{font-size:13px;font-weight:600;color:var(--muted)}
+.foto-small{font-size:11px;color:#B0BEC5;margin-top:3px}
+.foto-nome{font-size:12px;font-weight:700;margin-top:6px;color:var(--teal)}
+.submit-wrap{padding:0 16px;margin-top:8px}
+.btn-submit{width:100%;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:none;border-radius:16px;padding:18px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 18px rgba(37,211,102,0.35);transition:transform 0.15s}
+.btn-submit:active{transform:scale(0.97)}
+.btn-note{text-align:center;font-size:11px;color:var(--muted);margin-top:8px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🩺</div>
+  <h1>Formulário de Admissão</h1>
+  <p>Preencha antes do seu procedimento</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-label"><span>Progresso</span><span id="pct">0%</span></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<!-- 1. EXAME -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 1</div>
+    <h2>Qual exame você vai realizar?</h2>
+  </div>
+  <div class="card-body">
+    <div class="exam-group">
+      <input type="radio" name="exame" id="ex1" value="Endoscopia" onchange="upd()">
+      <label for="ex1"><span class="ei">🔭</span>Endoscopia</label>
+      <input type="radio" name="exame" id="ex2" value="Colonoscopia" onchange="upd()">
+      <label for="ex2"><span class="ei">🌀</span>Colonoscopia</label>
+      <input type="radio" name="exame" id="ex3" value="Endoscopia e Colonoscopia" onchange="upd()">
+      <label for="ex3"><span class="ei">🔁</span>Ambos</label>
+    </div>
+  </div>
+</div>
+
+<!-- 2. DADOS PESSOAIS -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 2</div>
+    <h2>Informações Pessoais</h2>
+  </div>
+  <div class="card-body">
+    <div class="field"><label>Nome completo <span class="req">*</span></label><input type="text" id="pacNome" placeholder="Seu nome completo" oninput="upd()"></div>
+    <div class="field-row">
+      <div class="field"><label>Nascimento</label><input type="date" id="pacNasc" onchange="upd()"></div>
+      <div class="field"><label>Telefone</label><input type="tel" id="pacTel" placeholder="(15) 9xxxx-xxxx" oninput="upd()"></div>
+    </div>
+    <div class="field">
+      <label>Convênio / Plano <span class="req">*</span></label>
+      <div class="conv-group">
+        <input type="radio" name="convenio" id="cv1" value="AMHEMED" onchange="showConvOutro()"><label for="cv1">AMHEMED</label>
+        <input type="radio" name="convenio" id="cv2" value="Fenix" onchange="showConvOutro()"><label for="cv2">Fênix</label>
+        <input type="radio" name="convenio" id="cv3" value="Particular" onchange="showConvOutro()"><label for="cv3">Particular</label>
+        <input type="radio" name="convenio" id="cv4" value="Unimed" onchange="showConvOutro()"><label for="cv4">Unimed</label>
+        <input type="radio" name="convenio" id="cv5" value="SUS" onchange="showConvOutro()"><label for="cv5">SUS</label>
+        <input type="radio" name="convenio" id="cv6" value="Outro" onchange="showConvOutro()"><label for="cv6">Outro</label>
+      </div>
+      <div class="detail-box" id="convOutroBox">
+        <input type="text" id="convOutroTxt" placeholder="Nome do convênio" oninput="upd()" class="ibox-input">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. SAÚDE -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 3</div>
+    <h2>Problemas de Saúde</h2>
+    <p>Hipertensão, diabetes, coração, pulmão...</p>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Tem hipertensão (pressão alta)?</label>
+      <div class="btn-group">
+        <input type="radio" name="hiper" id="h1" value="Nao" class="no" onchange="upd()"><label for="h1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="hiper" id="h2" value="Sim, controlada" class="warn" onchange="upd()"><label for="h2"><span class="bi">💊</span>Controlada</label>
+        <input type="radio" name="hiper" id="h3" value="Sim, sem controle" class="danger" onchange="upd()"><label for="h3"><span class="bi">⚠️</span>Sem controle</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Tem diabetes?</label>
+      <div class="btn-group">
+        <input type="radio" name="diab" id="d1" value="Nao" class="no" onchange="upd()"><label for="d1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="diab" id="d2" value="Sim, controlada" class="warn" onchange="upd()"><label for="d2"><span class="bi">💊</span>Controlada</label>
+        <input type="radio" name="diab" id="d3" value="Sim, sem controle" class="danger" onchange="upd()"><label for="d3"><span class="bi">⚠️</span>Sem controle</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Tem problema cardíaco?</label>
+      <div class="btn-group">
+        <input type="radio" name="cardio" id="ca1" value="Nao" class="no" onchange="showBox('cardioBox',false);upd()"><label for="ca1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="cardio" id="ca2" value="Sim" class="danger" onchange="showBox('cardioBox',true);upd()"><label for="ca2"><span class="bi">❤️</span>Sim</label>
+      </div>
+      <div class="detail-box danger-box" id="cardioBox">
+        <span class="ibox-label" style="color:#B71C1C">Qual problema cardíaco?</span>
+        <textarea id="cardioTxt" class="ibox-input" rows="2" placeholder="Ex: insuficiência, arritmia..." oninput="upd()"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <label>Tem problema respiratório?</label>
+      <div class="btn-group">
+        <input type="radio" name="resp" id="r1" value="Nao" class="no" onchange="showBox('respBox',false);upd()"><label for="r1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="resp" id="r2" value="Sim" class="warn" onchange="showBox('respBox',true);upd()"><label for="r2"><span class="bi">🫁</span>Sim</label>
+      </div>
+      <div class="detail-box warn-box" id="respBox">
+        <span class="ibox-label" style="color:#BF360C">Qual?</span>
+        <textarea id="respTxt" class="ibox-input" rows="2" placeholder="Ex: asma, DPOC, apneia..." oninput="upd()"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <label>Tem epilepsia / convulsões?</label>
+      <div class="btn-group">
+        <input type="radio" name="conv" id="cv_n" value="Nao" class="no" onchange="upd()"><label for="cv_n"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="conv" id="cv_s" value="Sim" class="warn" onchange="upd()"><label for="cv_s"><span class="bi">⚡</span>Sim</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Outros problemas de saúde</label>
+      <textarea id="outrosSaude" rows="2" placeholder="Ex: doença renal, hepática, tireoide..." oninput="upd()"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 4. HISTÓRICO CARDÍACO -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 4</div>
+    <h2>Já teve Infarto ou AVC?</h2>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Já teve infarto?</label>
+      <div class="btn-group">
+        <input type="radio" name="infarto" id="inf1" value="Nao" class="no" onchange="showBox('infartoBox',false);upd()"><label for="inf1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="infarto" id="inf2" value="Sim" class="danger" onchange="showBox('infartoBox',true);upd()"><label for="inf2"><span class="bi">❤️‍🔥</span>Sim</label>
+      </div>
+      <div class="detail-box danger-box" id="infartoBox">
+        <span class="ibox-label" style="color:#B71C1C">Quando foi?</span>
+        <input type="text" id="infartoWhen" class="ibox-input" placeholder="Ex: 2019, há 3 anos..." oninput="upd()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Já teve AVC / derrame?</label>
+      <div class="btn-group">
+        <input type="radio" name="avc" id="avc1" value="Nao" class="no" onchange="showBox('avcBox',false);upd()"><label for="avc1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="avc" id="avc2" value="Sim" class="danger" onchange="showBox('avcBox',true);upd()"><label for="avc2"><span class="bi">🧠</span>Sim</label>
+      </div>
+      <div class="detail-box danger-box" id="avcBox">
+        <span class="ibox-label" style="color:#B71C1C">Quando foi?</span>
+        <input type="text" id="avcWhen" class="ibox-input" placeholder="Ex: 2021, há 2 anos..." oninput="upd()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. DISPOSITIVOS -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 5</div>
+    <h2>Marcapasso, Stent ou Implantes</h2>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Usa marcapasso, stent ou implante metálico?</label>
+      <div class="btn-group">
+        <input type="radio" name="device" id="dev1" value="Nao" class="no" onchange="showBox('deviceBox',false);upd()"><label for="dev1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="device" id="dev2" value="Sim" class="warn" onchange="showBox('deviceBox',true);upd()"><label for="dev2"><span class="bi">🔧</span>Sim</label>
+      </div>
+      <div class="detail-box warn-box" id="deviceBox">
+        <span class="ibox-label" style="color:#BF360C">Qual(is)?</span>
+        <div class="tag-group">
+          <span class="tag" onclick="toggleTag(this)" data-val="Marcapasso">⚡ Marcapasso</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="CDI">⚡ CDI</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Stent coronario">🩺 Stent coronário</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Stent biliar">🩺 Stent biliar</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Protese metalica">🔩 Prótese metálica</span>
+        </div>
+        <input type="text" id="deviceOutro" class="ibox-input" placeholder="Outro implante..." oninput="upd()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. MEDICAÇÕES -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 6</div>
+    <h2>Medicações de Uso Contínuo</h2>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>🩸 Usa anticoagulante (afina o sangue)? <span class="req">*</span></label>
+      <div class="btn-group">
+        <input type="radio" name="anticoa" id="ac_n" value="Nao" class="no" onchange="showBox('anticoaBox',false);upd()"><label for="ac_n"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="anticoa" id="ac_s" value="Sim" class="danger" onchange="showBox('anticoaBox',true);upd()"><label for="ac_s"><span class="bi">🩸</span>Sim</label>
+      </div>
+      <div class="detail-box danger-box" id="anticoaBox">
+        <span class="ibox-label" style="color:#B71C1C">⚠️ Qual anticoagulante?</span>
+        <div class="tag-group">
+          <span class="tag" onclick="toggleTag(this)" data-val="Warfarina">💊 Warfarina</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Xarelto">💊 Xarelto</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Pradaxa">💊 Pradaxa</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Eliquis">💊 Eliquis</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Heparina">💉 Heparina</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="AAS/Aspirina">💊 AAS</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Clopidogrel">💊 Clopidogrel</span>
+        </div>
+        <input type="text" id="anticoaOutro" class="ibox-input" placeholder="Outro anticoagulante..." oninput="upd()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Usa outras medicações contínuas?</label>
+      <div class="btn-group">
+        <input type="radio" name="medic" id="med1" value="Nao" class="no" onchange="showBox('medicBox',false);upd()"><label for="med1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="medic" id="med2" value="Sim" class="warn" onchange="showBox('medicBox',true);upd()"><label for="med2"><span class="bi">💊</span>Sim</label>
+      </div>
+      <div class="detail-box warn-box" id="medicBox">
+        <span class="ibox-label" style="color:#BF360C">Quais medicamentos?</span>
+        <div class="tag-group">
+          <span class="tag" onclick="toggleTag(this)" data-val="Insulina">💉 Insulina</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Anti-hipertensivo">❤️ Anti-hipertensivo</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Medicacao cardiaca">❤️ Cardíaco</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Tireoide">🔵 Tireoide</span>
+          <span class="tag" onclick="toggleTag(this)" data-val="Psiquiatrico">🧠 Psiquiátrico</span>
+        </div>
+        <textarea id="medicTxt" class="ibox-input" rows="2" placeholder="Outros: nome e dose..." oninput="upd()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. ALERGIAS -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 7</div>
+    <h2>Alergias</h2>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Tem alergia ao LÁTEX? <span class="req">*</span></label>
+      <div class="btn-group">
+        <input type="radio" name="latex" id="lat1" value="Nao" class="no" onchange="upd()"><label for="lat1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="latex" id="lat2" value="Sim" class="danger" onchange="upd()"><label for="lat2"><span class="bi">🚨</span>Sim</label>
+        <input type="radio" name="latex" id="lat3" value="Nao sei" class="warn" onchange="upd()"><label for="lat3"><span class="bi">❓</span>Não sei</label>
+      </div>
+    </div>
+    <div class="field">
+      <label>Tem outras alergias?</label>
+      <div class="btn-group">
+        <input type="radio" name="alergia" id="al1" value="Nao" class="no" onchange="showBox('alergiaBox',false);upd()"><label for="al1"><span class="bi">✅</span>Não</label>
+        <input type="radio" name="alergia" id="al2" value="Sim" class="warn" onchange="showBox('alergiaBox',true);upd()"><label for="al2"><span class="bi">⚠️</span>Sim</label>
+      </div>
+      <div class="detail-box warn-box" id="alergiaBox">
+        <span class="ibox-label" style="color:#BF360C">A quê?</span>
+        <input type="text" id="alergiaTxt" class="ibox-input" placeholder="Ex: penicilina, contraste, dipirona..." oninput="upd()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. PEDIDO MÉDICO -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 8</div>
+    <h2>Pedido Médico</h2>
+    <p>Foto do encaminhamento (opcional)</p>
+  </div>
+  <div class="card-body">
+    <div class="foto-area" onclick="document.getElementById('fotoInput').click()">
+      <input type="file" id="fotoInput" accept="image/*" onchange="onFoto()">
+      <div class="foto-icon">📋</div>
+      <p>Toque para fotografar o pedido</p>
+      <div class="foto-small">JPG, PNG</div>
+      <div id="fotoNome" class="foto-nome"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. PRÉ-ANESTÉSICA -->
+<div class="card">
+  <div class="card-header">
+    <div class="step">Passo 9</div>
+    <h2>Avaliação Pré-Anestésica</h2>
+  </div>
+  <div class="card-body">
+    <div class="field">
+      <label>Já realizou avaliação pré-anestésica?</label>
+      <div class="btn-group">
+        <input type="radio" name="preanest" id="pa1" value="Sim, ja realizei" class="yes" onchange="upd()"><label for="pa1"><span class="bi">✅</span>Sim</label>
+        <input type="radio" name="preanest" id="pa2" value="Nao realizei" class="no" onchange="upd()"><label for="pa2"><span class="bi">❌</span>Não</label>
+        <input type="radio" name="preanest" id="pa3" value="Ja agendei" class="warn" onchange="upd()"><label for="pa3"><span class="bi">📅</span>Agendei</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT -->
+<div class="submit-wrap">
+  <div style="background:#FFF8E1;border:1.5px solid #FFA726;border-radius:14px;padding:16px;margin-bottom:14px">
+    <div style="font-weight:800;color:#BF360C;font-size:14px;margin-bottom:8px">&#128203; Como enviar sua ficha:</div>
+    <div style="font-size:14px;color:#1C2B3A;line-height:1.6">
+      <div style="margin-bottom:6px"><b>1.</b> Toque em <b>Gerar PDF</b> abaixo &mdash; o arquivo ser&aacute; salvo no seu celular</div>
+      <div style="margin-bottom:6px"><b>2.</b> Volte para a conversa do WhatsApp <b>onde voc&ecirc; recebeu este link</b> e envie o PDF respondendo nesse mesmo n&uacute;mero</div>
+      <div><b>3.</b> Se voc&ecirc; fotografou o pedido m&eacute;dico, envie a foto junto na mesma conversa</div>
+    </div>
+  </div>
+  <button class="btn-submit" id="btnEnviar" onclick="enviar()">
+    <span>📄</span> Gerar PDF e Enviar
+  </button>
+  <div class="btn-note" id="btnNote">Abre o WhatsApp com seus dados preenchidos</div>
+</div>
+
+<script>
+
+function v(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function r(n){var e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:'';}
+
+function showBox(id,show){
+  var b=document.getElementById(id);
+  if(b)b.classList.toggle('show',show);
+}
+function showConvOutro(){
+  showBox('convOutroBox',document.getElementById('cv6').checked);
+  upd();
+}
+function toggleTag(el){
+  el.classList.toggle('active');
+  upd();
+}
+function onFoto(){
+  var f=document.getElementById('fotoInput').files[0];
+  if(f) document.getElementById('fotoNome').textContent='✅ '+f.name;
+  upd();
+}
+
+function calcASA(){
+  var score=1, reasons=[];
+  function bump(s,why){ if(s>score)score=s; if(s>=2)reasons.push(why); }
+  var hiper=r('hiper'),diab=r('diab');
+  if(hiper==='Sim, controlada') bump(2,'HAS controlada');
+  if(hiper==='Sim, sem controle') bump(3,'HAS sem controle');
+  if(diab==='Sim, controlada') bump(2,'DM controlada');
+  if(diab==='Sim, sem controle') bump(3,'DM sem controle');
+  if(r('cardio')==='Sim') bump(2,'Cardiopatia');
+  if(r('resp')==='Sim') bump(2,'Doenca respiratoria');
+  if(r('conv')==='Sim') bump(2,'Epilepsia');
+  if(r('infarto')==='Sim') bump(3,'Infarto previo');
+  if(r('avc')==='Sim') bump(3,'AVC previo');
+  if(r('device')==='Sim') bump(2,'Implante');
+  if(r('anticoa')==='Sim') bump(2,'Anticoagulante');
+  if(r('medic')==='Sim') bump(2,'Medicacao continua');
+  if(r('latex')==='Sim') bump(2,'Alergia latex');
+  return {score:score, reasons:reasons};
+}
+
+function upd(){
+  var campos=['exame','hiper','diab','cardio','resp','infarto','avc','device','anticoa','medic','latex'];
+  var preenchidos=campos.filter(function(n){return r(n);}).length;
+  if(v('pacNome')) preenchidos++;
+  var pct=Math.min(100,Math.round((preenchidos/12)*100));
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('pct').textContent=pct+'%';
+}
+
+function tagsDe(boxId){
+  var arr=[];
+  document.querySelectorAll('#'+boxId+' .tag.active').forEach(function(el){arr.push(el.dataset.val);});
+  return arr;
+}
+
+function gerarTexto(){
+  var sep='------------------------------';
+  var asa=calcASA();
+  var asaStr=asa.score===1?'ASA I - Baixo risco':
+             asa.score===2?'ASA II - Risco moderado':
+                           'ASA III - Alto risco';
+
+  var nome=v('pacNome'), nasc=v('pacNasc'), tel=v('pacTel');
+  var exame=r('exame');
+  var conv=r('convenio')==='Outro'?v('convOutroTxt'):r('convenio');
+  var hiper=r('hiper'),diab=r('diab'),cardio=r('cardio'),cardioTxt=v('cardioTxt');
+  var resp=r('resp'),respTxt=v('respTxt'),conv2=r('conv'),outros=v('outrosSaude');
+  var infarto=r('infarto'),infartoWhen=v('infartoWhen');
+  var avc=r('avc'),avcWhen=v('avcWhen');
+  var device=r('device');
+  var devTags=tagsDe('deviceBox'); var devOutro=v('deviceOutro'); if(devOutro)devTags.push(devOutro);
+  var anticoa=r('anticoa');
+  var acTags=tagsDe('anticoaBox'); var acOutro=v('anticoaOutro'); if(acOutro)acTags.push(acOutro);
+  var medic=r('medic');
+  var medTags=tagsDe('medicBox'); var medicTxt=v('medicTxt'); if(medicTxt)medTags.push(medicTxt);
+  var latex=r('latex'),alergia=r('alergia'),alergiaTxt=v('alergiaTxt');
+  var preanest=r('preanest');
+  var temFoto=document.getElementById('fotoInput').files.length>0;
+
+  var t='*FORMULARIO DE ADMISSAO*\n';
+  if(exame) t+='Procedimento: *'+exame+'*\n';
+  t+=sep+'\n\n';
+
+  t+='*DADOS PESSOAIS*\n';
+  if(nome) t+='Nome: '+nome+'\n';
+  if(nasc){
+    var dn=new Date(nasc+'T12:00:00');
+    var idade=new Date().getFullYear()-dn.getFullYear();
+    t+='Nascimento: '+dn.toLocaleDateString('pt-BR')+' ('+idade+' anos)\n';
+  }
+  if(tel) t+='Telefone: '+tel+'\n';
+  if(conv) t+='Convenio: '+conv+'\n';
+  t+='\n';
+
+  t+='*RISCO ANESTESICO: '+asaStr+'*';
+  if(asa.reasons.length) t+=' ('+asa.reasons.join(', ')+')';
+  t+='\n\n';
+
+  t+='*SAUDE*\n';
+  if(hiper) t+='Hipertensao: '+hiper+'\n';
+  if(diab)  t+='Diabetes: '+diab+'\n';
+  if(cardio==='Sim') t+='Problema cardiaco: Sim'+(cardioTxt?' - '+cardioTxt:'')+'\n';
+  if(resp==='Sim') t+='Prob. respiratorio: Sim'+(respTxt?' - '+respTxt:'')+'\n';
+  if(conv2==='Sim') t+='Epilepsia/convulsoes: Sim\n';
+  if(infarto==='Sim') t+='Infarto previo: Sim'+(infartoWhen?' ('+infartoWhen+')':'')+'\n';
+  if(avc==='Sim') t+='AVC previo: Sim'+(avcWhen?' ('+avcWhen+')':'')+'\n';
+  if(outros) t+='Outros: '+outros+'\n';
+  t+='\n';
+
+  if(device==='Sim'){
+    t+='*DISPOSITIVOS/IMPLANTES:* '+(devTags.length?devTags.join(', '):'Sim')+'\n\n';
+  }
+
+  if(anticoa==='Sim'){
+    t+='*ANTICOAGULANTE:* '+(acTags.length?acTags.join(', '):'Sim (nao especificado)')+'\n\n';
+  } else if(anticoa==='Nao'){
+    t+='Anticoagulante: Nao usa\n\n';
+  }
+
+  if(medic==='Sim'){
+    t+='*MEDICACOES EM USO:* '+(medTags.length?medTags.join(', '):'Nao especificado')+'\n\n';
+  }
+
+  if(latex) t+='*LATEX:* '+latex+'\n';
+  if(alergia==='Sim') t+='Outras alergias: '+(alergiaTxt||'Sim')+'\n';
+  t+='\n';
+
+  t+='Pedido medico: '+(temFoto?'Foto anexada a parte':'Nao enviado')+'\n';
+  if(preanest) t+='Pre-anestesica: '+preanest+'\n';
+  t+='\n'+sep+'\n_Enviado via Formulario de Admissao_';
+
+  return t;
+}
+
+function gerarPDF(){
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var W=210, ml=14, cw=182, y=0;
+
+  var asa=calcASA();
+  var asaStr=asa.score===1?'ASA I - Baixo risco':asa.score===2?'ASA II - Risco moderado':'ASA III - Alto risco';
+  var asaColors=[[0,0,0],[46,125,50],[191,54,12],[183,28,28]];
+  var asaBgs=[[255,255,255],[232,245,233],[255,248,225],[255,235,238]];
+  var ac=asaColors[asa.score], abg=asaBgs[asa.score];
+
+  var nome=v('pacNome'), nasc=v('pacNasc'), tel=v('pacTel'), exame=r('exame');
+  var conv=r('convenio')==='Outro'?v('convOutroTxt'):r('convenio');
+  var idadeStr='';
+  if(nasc){var dn=new Date(nasc+'T12:00:00');idadeStr=' ('+(new Date().getFullYear()-dn.getFullYear())+' anos)';}
+  var hiper=r('hiper'),diab=r('diab'),cardio=r('cardio'),cardioTxt=v('cardioTxt');
+  var resp=r('resp'),respTxt=v('respTxt'),conv2=r('conv'),outros=v('outrosSaude');
+  var infarto=r('infarto'),infartoWhen=v('infartoWhen'),avc=r('avc'),avcWhen=v('avcWhen');
+  var device=r('device');
+  var devTags=tagsDe('deviceBox'); var devOutro=v('deviceOutro'); if(devOutro)devTags.push(devOutro);
+  var anticoa=r('anticoa');
+  var acTags=tagsDe('anticoaBox'); var acOutro=v('anticoaOutro'); if(acOutro)acTags.push(acOutro);
+  var medic=r('medic');
+  var medTags=tagsDe('medicBox'); var medicTxt=v('medicTxt'); if(medicTxt)medTags.push(medicTxt);
+  var latex=r('latex'),alergia=r('alergia'),alergiaTxt=v('alergiaTxt');
+  var preanest=r('preanest');
+  var temFoto=document.getElementById('fotoInput').files.length>0;
+  var dataHoje=new Date().toLocaleString('pt-BR');
+
+  function checkPage(){ if(y>272){doc.addPage();y=16;} }
+  function hdr(text,bg){
+    checkPage();
+    doc.setFillColor(bg[0],bg[1],bg[2]);
+    doc.roundedRect(ml,y,cw,8,1.5,1.5,'F');
+    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+    doc.text(text,ml+3,y+5.5); y+=11;
+  }
+  function row(label,val){
+    if(!val) return;
+    checkPage();
+    doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(120,140,160);
+    doc.text(label.toUpperCase(),ml,y);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
+    var ls=doc.splitTextToSize(val,cw);
+    doc.text(ls,ml,y+4); y+=4+ls.length*5+3;
+  }
+  function divider(){ checkPage(); doc.setDrawColor(220,228,238); doc.line(ml,y,W-ml,y); y+=5; }
+
+  // Cabecalho
+  doc.setFillColor(11,37,69); doc.rect(0,0,W,28,'F');
+  doc.setFontSize(16);doc.setFont('helvetica','bold');doc.setTextColor(255,255,255);
+  doc.text('Formulario de Admissao',ml,13);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(180,200,220);
+  doc.text(dataHoje+(exame?'   |   '+exame:''),ml,21);
+  y=34;
+
+  function fmt(val,simTxt){
+    if(val==='Sim') return simTxt?('Sim - '+simTxt):'Sim';
+    if(val==='Nao') return 'Nao';
+    if(val==='Nao sei') return 'Nao sabe';
+    if(val) return val;
+    return 'Nao informado';
+  }
+
+  hdr('DADOS PESSOAIS',[27,108,168]);
+  row('Nome',nome||'Nao informado');
+  row('Nascimento',nasc?(new Date(nasc+'T12:00:00').toLocaleDateString('pt-BR')+idadeStr):'Nao informado');
+  row('Telefone',tel||'Nao informado');
+  row('Convenio',conv||'Nao informado');
+  row('Exame solicitado',exame||'Nao informado');
+  divider();
+
+  hdr('SAUDE',[46,125,50]);
+  row('Hipertensao (pressao alta)',fmt(hiper));
+  row('Diabetes',fmt(diab));
+  row('Problema cardiaco',fmt(cardio,cardioTxt));
+  row('Problema respiratorio',fmt(resp,respTxt));
+  row('Epilepsia / convulsoes',fmt(conv2));
+  row('Outros problemas de saude',outros||'Nenhum relatado');
+  divider();
+
+  hdr('HISTORICO CARDIACO GRAVE',[198,40,40]);
+  row('Ja teve infarto',fmt(infarto,infartoWhen));
+  row('Ja teve AVC / derrame',fmt(avc,avcWhen));
+  divider();
+
+  hdr('DISPOSITIVOS / IMPLANTES',[106,27,154]);
+  row('Usa marcapasso/stent/implante',device==='Sim'?(devTags.length?('Sim - '+devTags.join(', ')):'Sim'):fmt(device));
+  divider();
+
+  hdr('MEDICACOES',[230,81,0]);
+  row('Usa anticoagulante',anticoa==='Sim'?(acTags.length?('Sim - '+acTags.join(', ')):'Sim'):fmt(anticoa));
+  row('Outras medicacoes continuas',medic==='Sim'?(medTags.length?('Sim - '+medTags.join(', ')):'Sim'):fmt(medic));
+  divider();
+
+  hdr('ALERGIAS',[198,40,40]);
+  row('Alergia ao LATEX',fmt(latex));
+  row('Outras alergias',alergia==='Sim'?(alergiaTxt?('Sim - '+alergiaTxt):'Sim'):fmt(alergia));
+  divider();
+
+  hdr('DOCUMENTOS E PRE-ANESTESICA',[27,108,168]);
+  row('Pedido medico',temFoto?'Foto anexada (enviar a parte)':'Nao enviado');
+  row('Avaliacao pre-anestesica',preanest||'Nao informado');
+  divider();
+
+  // ASA
+  checkPage();
+  doc.setFillColor(abg[0],abg[1],abg[2]);
+  doc.roundedRect(ml,y,cw,14,2,2,'F');
+  doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(ac[0],ac[1],ac[2]);
+  doc.text('RISCO ANESTESICO - USO INTERNO',ml+3,y+5);
+  doc.setFontSize(10);
+  doc.text(asaStr+(asa.reasons.length?' ('+asa.reasons.join(', ')+')':''),ml+3,y+11);
+  y+=18;
+
+  // Rodape em todas as paginas
+  var nPages=doc.internal.getNumberOfPages();
+  for(var p=1;p<=nPages;p++){
+    doc.setPage(p);
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(180,180,180);
+    doc.text('Gerado em '+dataHoje+'  -  Pagina '+p+'/'+nPages,ml,289);
+  }
+
+  return doc;
+}
+
+async function enviar(){
+  if(!v('pacNome')){ alert('Por favor, preencha seu nome.'); return; }
+  if(!r('exame')){ alert('Por favor, selecione qual exame voce vai realizar.'); return; }
+
+  if(typeof window.jspdf==='undefined'){
+    alert('A biblioteca de PDF nao carregou. Verifique sua internet e recarregue a pagina.');
+    return;
+  }
+
+  var btn=document.getElementById('btnEnviar');
+  var note=document.getElementById('btnNote');
+  btn.innerHTML='<span>&#9203;</span> Gerando PDF...';
+  btn.disabled=true;
+
+  try{
+    var doc=gerarPDF();
+    var nomeArq='Admissao_'+v('pacNome').replace(/\s+/g,'_')+'.pdf';
+    var msg='Ola! Sou *'+v('pacNome')+'*. Segue minha ficha de admissao para *'+r('exame')+'*.';
+
+    // 1) Compartilhamento nativo: abre o menu para escolher a conversa (HTTPS real)
+    var blob=doc.output('blob');
+    var pdfFile=new File([blob],nomeArq,{type:'application/pdf'});
+
+    if(navigator.canShare && navigator.canShare({files:[pdfFile]})){
+      try{
+        await navigator.share({title:'Ficha de Admissao',text:msg,files:[pdfFile]});
+        btn.innerHTML='<span>&#9989;</span> Enviado!';
+        note.textContent='Ficha compartilhada com sucesso!';
+        btn.disabled=false;
+        return;
+      }catch(e){
+        if(e.name==='AbortError'){
+          btn.innerHTML='<span>&#128196;</span> Gerar PDF e Enviar';
+          btn.disabled=false;
+          return;
+        }
+      }
+    }
+
+    // 2) Fallback: baixa o PDF + instrucao para responder no mesmo numero
+    doc.save(nomeArq);
+    btn.innerHTML='<span>&#9989;</span> PDF gerado!';
+    note.innerHTML=
+      '<div style="background:#E8F5E9;border:1.5px solid #66BB6A;border-radius:12px;padding:16px;margin-top:8px;text-align:left">'+
+      '<div style="font-weight:800;color:#1B5E20;font-size:15px;margin-bottom:10px">&#9989; PDF salvo no seu celular!</div>'+
+      '<div style="font-size:14px;color:#1C2B3A;margin-bottom:6px"><b>1.</b> Volte para a conversa do WhatsApp onde voc&ecirc; recebeu este link</div>'+
+      '<div style="font-size:14px;color:#1C2B3A"><b>2.</b> Envie o arquivo <b>'+nomeArq+'</b> respondendo nesse mesmo n&uacute;mero</div>'+
+      '</div>';
+
+  }catch(err){
+    console.error(err);
+    alert('Erro ao gerar PDF: '+err.message);
+    btn.innerHTML='<span>&#128196;</span> Gerar PDF e Enviar';
+  }
+  btn.disabled=false;
+}
+
+upd();
+</script>
+
+</body>
+</html>
