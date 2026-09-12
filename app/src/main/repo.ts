@@ -91,6 +91,7 @@ function rowToExam(r: any): Exam {
     data: r.data,
     solicitante: r.solicitante,
     convenio: r.convenio,
+    local: r.local,
     indicacao: r.indicacao,
     secoes: safeJson(r.secoes, []),
     urease: r.urease,
@@ -124,7 +125,7 @@ export const exams = {
       params.q = `%${filter.query.trim()}%`
     }
     const sql = `
-      SELECT e.id, e.tipo, e.data, e.solicitante, e.convenio, e.patient_id, e.laudo_gerado_em,
+      SELECT e.id, e.tipo, e.data, e.solicitante, e.convenio, e.local, e.patient_id, e.laudo_gerado_em,
              p.nome AS paciente_nome, p.data_nascimento AS paciente_nascimento,
              (SELECT COUNT(*) FROM photos ph WHERE ph.exam_id = e.id) AS fotos
       FROM exams e JOIN patients p ON p.id = e.patient_id
@@ -136,6 +137,7 @@ export const exams = {
       data: r.data,
       solicitante: r.solicitante,
       convenio: r.convenio,
+      local: r.local,
       patientId: r.patient_id,
       pacienteNome: r.paciente_nome,
       pacienteNascimento: r.paciente_nascimento,
@@ -151,10 +153,12 @@ export const exams = {
     const db = getDb()
     const ts = now()
     const tpl = templates.defaultFor(input.tipo)
+    const cfg = settings.get()
+    const localPadrao = cfg.locais.find((l) => l.id === cfg.localPadraoId)?.nome ?? ''
     const res = db
       .prepare(
-        `INSERT INTO exams (patient_id, tipo, data, solicitante, convenio, indicacao, secoes, urease, conclusao, created_at, updated_at)
-         VALUES (@patientId, @tipo, @data, @solicitante, @convenio, @indicacao, @secoes, 'NAO', @conclusao, @ts, @ts)`
+        `INSERT INTO exams (patient_id, tipo, data, solicitante, convenio, local, indicacao, secoes, urease, conclusao, created_at, updated_at)
+         VALUES (@patientId, @tipo, @data, @solicitante, @convenio, @local, @indicacao, @secoes, 'NAO', @conclusao, @ts, @ts)`
       )
       .run({
         patientId: input.patientId,
@@ -162,6 +166,7 @@ export const exams = {
         data: input.data,
         solicitante: input.solicitante || '',
         convenio: input.convenio || '',
+        local: input.local ?? localPadrao,
         indicacao: input.indicacao || '',
         secoes: JSON.stringify(tpl?.secoes ?? []),
         conclusao: tpl?.conclusao ?? '',
@@ -174,13 +179,14 @@ export const exams = {
     const cur = exams.get(id)
     if (!cur) throw new Error('Exame não encontrado')
     db.prepare(
-      `UPDATE exams SET data=@data, solicitante=@solicitante, convenio=@convenio, indicacao=@indicacao,
+      `UPDATE exams SET data=@data, solicitante=@solicitante, convenio=@convenio, local=@local, indicacao=@indicacao,
        secoes=@secoes, urease=@urease, conclusao=@conclusao, updated_at=@ts WHERE id=@id`
     ).run({
       id,
       data: patch.data ?? cur.data,
       solicitante: patch.solicitante ?? cur.solicitante,
       convenio: patch.convenio ?? cur.convenio,
+      local: patch.local ?? cur.local,
       indicacao: patch.indicacao ?? cur.indicacao,
       secoes: JSON.stringify(patch.secoes ?? cur.secoes),
       urease: patch.urease ?? cur.urease,
@@ -276,6 +282,7 @@ function rowToTemplate(r: any): Template {
     tipo: r.tipo,
     nome: r.nome,
     titulo: r.titulo,
+    tituloCorpo: r.titulo_corpo ?? '',
     secoes: safeJson(r.secoes, []),
     conclusao: r.conclusao,
     legendas: safeJson(r.legendas, []),
@@ -307,6 +314,7 @@ export const templates = {
       tipo: input.tipo,
       nome: input.nome.trim() || 'Modelo',
       titulo: input.titulo.trim(),
+      tituloCorpo: (input.tituloCorpo ?? '').trim(),
       secoes: JSON.stringify(input.secoes ?? []),
       conclusao: input.conclusao ?? '',
       legendas: JSON.stringify(input.legendas ?? []),
@@ -319,15 +327,15 @@ export const templates = {
       }
       if (params.id) {
         db.prepare(
-          `UPDATE templates SET tipo=@tipo, nome=@nome, titulo=@titulo, secoes=@secoes, conclusao=@conclusao,
-           legendas=@legendas, tem_urease=@temUrease, padrao=@padrao WHERE id=@id`
+          `UPDATE templates SET tipo=@tipo, nome=@nome, titulo=@titulo, titulo_corpo=@tituloCorpo, secoes=@secoes,
+           conclusao=@conclusao, legendas=@legendas, tem_urease=@temUrease, padrao=@padrao WHERE id=@id`
         ).run(params)
         return params.id
       }
       const res = db
         .prepare(
-          `INSERT INTO templates (tipo, nome, titulo, secoes, conclusao, legendas, tem_urease, padrao)
-           VALUES (@tipo, @nome, @titulo, @secoes, @conclusao, @legendas, @temUrease, @padrao)`
+          `INSERT INTO templates (tipo, nome, titulo, titulo_corpo, secoes, conclusao, legendas, tem_urease, padrao)
+           VALUES (@tipo, @nome, @titulo, @tituloCorpo, @secoes, @conclusao, @legendas, @temUrease, @padrao)`
         )
         .run(params)
       return Number(res.lastInsertRowid)
@@ -344,6 +352,8 @@ const DEFAULT_SETTINGS: Settings = {
   medicoNome: 'Dr. Marcelo Ferraz Passos',
   medicoCrm: '135.046',
   cabecalhoExtra: '',
+  locais: [],
+  localPadraoId: '',
   pastaImportacao: '',
   dispositivoVideoId: '',
   fotosPorLinha: 3,

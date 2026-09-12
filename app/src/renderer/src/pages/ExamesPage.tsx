@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { ExamListItem, ExamType, Patient } from '@shared/types'
+import type { ExamListItem, ExamType, Local, Patient } from '@shared/types'
 import type { Route } from '../App'
 import { Modal } from '../components/Modal'
 import { PatientForm } from '../components/PatientForm'
@@ -94,11 +94,17 @@ function NovoExame({ onClose, onCreated }: { onClose: () => void; onCreated: (id
   const [indicacao, setIndicacao] = useState('')
   const [solicitantes, setSolicitantes] = useState<string[]>([])
   const [convenios, setConvenios] = useState<string[]>([])
+  const [locais, setLocais] = useState<Local[]>([])
+  const [local, setLocal] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     window.api.suggestions.solicitantes().then(setSolicitantes)
     window.api.suggestions.convenios().then(setConvenios)
+    window.api.settings.get().then((s) => {
+      setLocais(s.locais)
+      setLocal(s.locais.find((l) => l.id === s.localPadraoId)?.nome ?? s.locais[0]?.nome ?? '')
+    })
   }, [])
 
   useEffect(() => {
@@ -116,7 +122,7 @@ function NovoExame({ onClose, onCreated }: { onClose: () => void; onCreated: (id
     if (!patient) return toast('Selecione ou cadastre o paciente', true)
     setSaving(true)
     try {
-      const e = await window.api.exams.create({ patientId: patient.id, tipo, data, solicitante, convenio, indicacao })
+      const e = await window.api.exams.create({ patientId: patient.id, tipo, data, solicitante, convenio, local, indicacao })
       onCreated(e.id)
     } catch (err) {
       toast(errMsg(err), true)
@@ -199,9 +205,22 @@ function NovoExame({ onClose, onCreated }: { onClose: () => void; onCreated: (id
           </datalist>
         </div>
       </div>
-      <div className="field">
-        <label>Indicação (opcional)</label>
-        <input value={indicacao} onChange={(e) => setIndicacao(e.target.value)} placeholder="Ex.: epigastralgia, rastreamento…" />
+      <div className="grid2">
+        <div className="field">
+          <label>Local do exame (logo do laudo)</label>
+          <select value={local} onChange={(e) => setLocal(e.target.value)}>
+            {!locais.some((l) => l.nome === local) && <option value={local}>{local || '(sem local)'}</option>}
+            {locais.map((l) => (
+              <option key={l.id} value={l.nome}>
+                {l.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field">
+          <label>Indicação (opcional)</label>
+          <input value={indicacao} onChange={(e) => setIndicacao(e.target.value)} placeholder="Ex.: epigastralgia, rastreamento…" />
+        </div>
       </div>
       <div className="actions">
         <button className="btn" onClick={onClose}>

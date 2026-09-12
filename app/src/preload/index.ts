@@ -40,7 +40,8 @@ const api: Api = {
   settings: {
     get: inv('settings:get'),
     save: inv('settings:save'),
-    chooseFolder: inv('settings:chooseFolder')
+    chooseFolder: inv('settings:chooseFolder'),
+    chooseLogo: inv('settings:chooseLogo')
   },
   suggestions: {
     solicitantes: inv('suggestions:solicitantes'),

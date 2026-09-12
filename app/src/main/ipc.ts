@@ -2,7 +2,9 @@ import { ipcMain, dialog, shell, app, BrowserWindow } from 'electron'
 import { exams, patients, photos as photoRepo, settings, suggestions, templates } from './repo'
 import { examFolder, importCandidates, importPhotoFiles, removePhoto, savePhotoFromCapture } from './photos'
 import { generateReport } from './report/docx'
-import { dataDir } from './paths'
+import { dataDir, logosDir } from './paths'
+import { join, extname, basename } from 'path'
+import { copyFileSync } from 'fs'
 import { existsSync } from 'fs'
 
 function handle(channel: string, fn: (...args: any[]) => any): void {
@@ -76,6 +78,20 @@ export function registerIpc(): void {
       properties: ['openDirectory']
     })
     return res.canceled ? null : res.filePaths[0]
+  })
+
+  handle('settings:chooseLogo', async () => {
+    const win = BrowserWindow.getFocusedWindow() ?? undefined
+    const res = await dialog.showOpenDialog(win as any, {
+      title: 'Logo do hospital / clínica',
+      properties: ['openFile'],
+      filters: [{ name: 'Imagens', extensions: ['png', 'jpg', 'jpeg', 'gif', 'bmp'] }]
+    })
+    if (res.canceled || !res.filePaths[0]) return null
+    const src = res.filePaths[0]
+    const dest = join(logosDir(), `${Date.now()}_${basename(src, extname(src)).replace(/[^a-zA-Z0-9_-]+/g, '_')}${extname(src).toLowerCase()}`)
+    copyFileSync(src, dest)
+    return dest
   })
 
   // Sugestões

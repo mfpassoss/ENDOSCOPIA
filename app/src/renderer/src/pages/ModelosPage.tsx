@@ -7,6 +7,7 @@ const EMPTY = (tipo: ExamType): TemplateInput => ({
   tipo,
   nome: '',
   titulo: tipo === 'EDA' ? 'ENDOSCOPIA DIGESTIVA ALTA' : 'COLONOSCOPIA',
+  tituloCorpo: '',
   secoes: [],
   conclusao: '',
   legendas: [],
@@ -110,6 +111,10 @@ export function ModelosPage(): JSX.Element {
                 <label>Título impresso no cabeçalho</label>
                 <input value={sel.titulo} onChange={(e) => set({ titulo: e.target.value })} />
               </div>
+            </div>
+            <div className="field">
+              <label>Título no início do corpo (opcional)</label>
+              <input value={sel.tituloCorpo} onChange={(e) => set({ tituloCorpo: e.target.value })} placeholder="Ex.: RELATÓRIO DE VÍDEOCOLONOSCOPIA" />
             </div>
             <div className="row" style={{ marginBottom: 14 }}>
               <label className="row" style={{ gap: 6 }}>

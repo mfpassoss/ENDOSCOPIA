@@ -14,10 +14,11 @@ import {
   VerticalAlign,
   WidthType
 } from 'docx'
-import { writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { Exam, Patient, Photo, Settings, Template } from '@shared/types'
 import { examFolder, imageSize, photoForReport } from '../photos'
+import { extname } from 'path'
 import { exams, patients, photos as photoRepo, settings as settingsRepo, templates } from '../repo'
 
 const FONT = 'Arial'
@@ -102,6 +103,19 @@ function buildHeader(exam: Exam, patient: Patient, tpl: Template | null, cfg: Se
     })
   ]
   const children: (Paragraph | Table)[] = []
+  const logo = logoFor(exam, cfg)
+  if (logo) {
+    const { width, height } = imageSize(logo.path)
+    const h = 48 // px (~1,3 cm)
+    const w = Math.round((h * width) / Math.max(1, height))
+    children.push(
+      new Paragraph({
+        alignment: AlignmentType.LEFT,
+        spacing: { before: 0, after: 60 },
+        children: [new ImageRun({ type: logo.type, data: logo.data, transformation: { width: Math.min(w, 320), height: h } })]
+      })
+    )
+  }
   if (cfg.cabecalhoExtra.trim()) {
     children.push(
       new Paragraph({
@@ -126,6 +140,16 @@ function buildHeader(exam: Exam, patient: Patient, tpl: Template | null, cfg: Se
     blank()
   )
   return new Header({ children })
+}
+
+/** Logo do local do exame (hospital/clínica), se cadastrado e o arquivo existir. */
+function logoFor(exam: Exam, cfg: Settings): { path: string; data: Buffer; type: 'png' | 'jpg' | 'gif' | 'bmp' } | null {
+  const local = cfg.locais.find((l) => l.nome === exam.local) ?? cfg.locais.find((l) => l.id === cfg.localPadraoId && !exam.local)
+  if (!local?.logo || !existsSync(local.logo)) return null
+  const ext = extname(local.logo).toLowerCase()
+  const type = ext === '.png' ? 'png' : ext === '.gif' ? 'gif' : ext === '.bmp' ? 'bmp' : ext === '.jpg' || ext === '.jpeg' ? 'jpg' : null
+  if (!type) return null
+  return { path: local.logo, data: readFileSync(local.logo), type }
 }
 
 function buildFooter(cfg: Settings): Footer {
@@ -159,56 +183,47 @@ function ureaseTable(urease: Exam['urease']): Table {
 function photoTable(photos: Photo[], perRow: number): Table {
   const TOTAL = 10800
   const colW = Math.floor(TOTAL / perRow)
-  const cellPxWidth = Math.round((colW / 1440) * 96) - 10 // pontos → pixels @96dpi, com folga
+  const cellPxWidth = Math.round((colW / 1440) * 96) - 10 // twips → pixels @96dpi, com folga
   const rows: TableRow[] = []
   for (let i = 0; i < photos.length; i += perRow) {
     const chunk = photos.slice(i, i + perRow)
-    const imgCells: TableCell[] = []
-    const labelCells: TableCell[] = []
+    const cells: TableCell[] = []
     for (let c = 0; c < perRow; c++) {
       const p = chunk[c]
-      let imgChildren: Paragraph[] = [blank()]
+      let img: Paragraph = blank()
       if (p) {
         try {
           const data = photoForReport(p.arquivo)
           const { width, height } = imageSize(p.arquivo)
           const h = Math.round((cellPxWidth * height) / width)
-          imgChildren = [
-            new Paragraph({
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 0, after: 0 },
-              children: [new ImageRun({ type: 'jpg', data, transformation: { width: cellPxWidth, height: h } })]
-            })
-          ]
+          img = new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 40, after: 40 },
+            keepNext: true,
+            children: [new ImageRun({ type: 'jpg', data, transformation: { width: cellPxWidth, height: h } })]
+          })
         } catch {
-          imgChildren = [bodyPara([bodyRun('[imagem indisponível]')], { alignment: AlignmentType.CENTER })]
+          img = bodyPara([bodyRun('[imagem indisponível]')], { alignment: AlignmentType.CENTER })
         }
       }
-      imgCells.push(
+      // Foto e legenda na mesma célula: a linha é indivisível, então nunca separam de página.
+      const label = new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 0, after: 0 },
+        border: { top: { style: BorderStyle.SINGLE, size: 4, color: 'auto', space: 1 } },
+        children: [new TextRun({ text: p?.legenda ?? '', font: 'Calibri', size: 22 })]
+      })
+      cells.push(
         new TableCell({
           width: { size: colW, type: WidthType.DXA },
           borders: THIN_BORDERS,
-          verticalAlign: VerticalAlign.CENTER,
-          margins: { top: 40, bottom: 40, left: 40, right: 40 },
-          children: imgChildren
-        })
-      )
-      labelCells.push(
-        new TableCell({
-          width: { size: colW, type: WidthType.DXA },
-          borders: THIN_BORDERS,
-          children: [
-            new Paragraph({
-              alignment: AlignmentType.CENTER,
-              spacing: { before: 0, after: 0 },
-              children: [new TextRun({ text: p?.legenda ?? '', font: 'Calibri', size: 22 })]
-            })
-          ]
+          verticalAlign: VerticalAlign.BOTTOM,
+          margins: { top: 0, bottom: 0, left: 0, right: 0 },
+          children: [img, label]
         })
       )
     }
-    rows.push(new TableRow({ cantSplit: true, children: imgCells }))
-    rows.push(new TableRow({ cantSplit: true, children: labelCells }))
+    rows.push(new TableRow({ cantSplit: true, children: cells }))
   }
   return new Table({
     width: { size: colW * perRow, type: WidthType.DXA },
@@ -226,8 +241,12 @@ export async function generateReport(examId: number): Promise<{ path: string }> 
   const cfg = settingsRepo.get()
   const tpl = templates.defaultFor(exam.tipo)
   const fotos = photoRepo.list(examId)
+  const temLogo = !!logoFor(exam, cfg)
 
   const body: (Paragraph | Table)[] = []
+  if (tpl?.tituloCorpo?.trim()) {
+    body.push(bodyPara([bodyRun(tpl.tituloCorpo.trim(), true)], { alignment: AlignmentType.CENTER }), blank())
+  }
   if (exam.indicacao.trim()) {
     body.push(bodyPara([bodyRun('Indicação: ', true), bodyRun(exam.indicacao.trim())]), blank())
   }
@@ -270,7 +289,7 @@ export async function generateReport(examId: number): Promise<{ path: string }> 
         properties: {
           page: {
             size: { width: 11906, height: 16838 },
-            margin: { top: 1954, right: 566, bottom: 1417, left: 709, header: 426, footer: 708 }
+            margin: { top: temLogo ? 2700 : 1954, right: 566, bottom: 1417, left: 709, header: 426, footer: 708 }
           }
         },
         headers: { default: buildHeader(exam, patient, tpl, cfg) },

@@ -27,6 +27,7 @@ export interface Exam {
   data: string // ISO yyyy-mm-dd
   solicitante: string
   convenio: string
+  local: string // hospital/clínica onde o exame foi feito (define o logo do laudo)
   indicacao: string
   secoes: ReportSection[]
   urease: Urease
@@ -43,6 +44,7 @@ export interface ExamListItem {
   data: string
   solicitante: string
   convenio: string
+  local: string
   patientId: number
   pacienteNome: string
   pacienteNascimento: string
@@ -56,6 +58,7 @@ export interface ExamInput {
   data: string
   solicitante: string
   convenio: string
+  local?: string
   indicacao: string
 }
 
@@ -63,6 +66,7 @@ export interface ExamUpdate {
   data?: string
   solicitante?: string
   convenio?: string
+  local?: string
   indicacao?: string
   secoes?: ReportSection[]
   urease?: Urease
@@ -83,6 +87,7 @@ export interface Template {
   tipo: ExamType
   nome: string
   titulo: string // título impresso no cabeçalho
+  tituloCorpo: string // título opcional no início do corpo (ex.: RELATÓRIO DE VÍDEOCOLONOSCOPIA)
   secoes: ReportSection[]
   conclusao: string
   legendas: string[] // legendas padrão das fotos, em ordem
@@ -92,10 +97,19 @@ export interface Template {
 
 export type TemplateInput = Omit<Template, 'id'>
 
+/** Hospital / clínica onde os exames são feitos. O logo vai no cabeçalho do laudo. */
+export interface Local {
+  id: string
+  nome: string
+  logo: string // caminho absoluto do arquivo de imagem ('' = sem logo)
+}
+
 export interface Settings {
   medicoNome: string
   medicoCrm: string
   cabecalhoExtra: string
+  locais: Local[]
+  localPadraoId: string
   pastaImportacao: string
   dispositivoVideoId: string
   fotosPorLinha: number
@@ -147,6 +161,8 @@ export interface Api {
     get(): Promise<Settings>
     save(patch: Partial<Settings>): Promise<Settings>
     chooseFolder(): Promise<string | null>
+    /** Abre seletor de imagem, copia para a pasta de logos e devolve o caminho. */
+    chooseLogo(): Promise<string | null>
   }
   suggestions: {
     solicitantes(): Promise<string[]>

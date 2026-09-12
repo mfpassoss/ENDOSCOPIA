@@ -7,7 +7,8 @@ Aplicativo de mesa (Windows agora, Mac depois com o mesmo código) para exames d
 - **captura de imagens direto da placa de captura** (mesmo dispositivo que o Debut usa), com atalho de teclado;
 - importação de fotos (arrastar e soltar, seletor de arquivos ou "fotos novas na pasta do Debut");
 - **laudo em Word (.docx)** gerado a partir das máscaras, com as fotos em grade legendada, pronto para revisar e imprimir;
-- modelos de laudo editáveis dentro do app (texto de cada seção, conclusão e legendas das fotos).
+- modelos de laudo editáveis dentro do app (texto de cada seção, conclusão e legendas das fotos);
+- locais de exame (hospital/clínica) com logo no cabeçalho do laudo, escolhido por exame.
 
 Tudo fica local, sem servidor: banco SQLite + fotos + laudos na pasta `Documentos\EndoLaudo`.
 

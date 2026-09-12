@@ -77,7 +77,7 @@ export function ExamePage({ id, initialTab, nav }: Props): JSX.Element {
           </h1>
           <div className="sub">
             {tipoLabel(exam.tipo)} · {fmtDate(exam.data)} ·{' '}
-            {[patient.sexo, idade(patient.dataNascimento, exam.data), exam.convenio || patient.convenio].filter(Boolean).join(' · ')}
+            {[patient.sexo, idade(patient.dataNascimento, exam.data), exam.convenio || patient.convenio, exam.local].filter(Boolean).join(' · ')}
           </div>
         </div>
         <div className="row">
@@ -103,7 +103,7 @@ export function ExamePage({ id, initialTab, nav }: Props): JSX.Element {
       </div>
 
       {tab === 'dados' && (
-        <DadosTab exam={exam} patient={patient} patch={patch} onEditPatient={() => setEditPatient(true)} onDeleted={() => nav({ name: 'exames' })} />
+        <DadosTab exam={exam} patient={patient} settings={settings} patch={patch} onEditPatient={() => setEditPatient(true)} onDeleted={() => nav({ name: 'exames' })} />
       )}
       {tab === 'imagens' && (
         <ImagensTab
@@ -135,12 +135,14 @@ export function ExamePage({ id, initialTab, nav }: Props): JSX.Element {
 function DadosTab({
   exam,
   patient,
+  settings,
   patch,
   onEditPatient,
   onDeleted
 }: {
   exam: Exam
   patient: Patient
+  settings: Settings
   patch: (p: Partial<Exam>) => void
   onEditPatient: () => void
   onDeleted: () => void
@@ -214,6 +216,17 @@ function DadosTab({
               <option key={c} value={c} />
             ))}
           </datalist>
+        </div>
+        <div className="field">
+          <label>Local do exame (logo do laudo)</label>
+          <select value={exam.local} onChange={(e) => patch({ local: e.target.value })}>
+            {!settings.locais.some((l) => l.nome === exam.local) && <option value={exam.local}>{exam.local || '(sem local)'}</option>}
+            {settings.locais.map((l) => (
+              <option key={l.id} value={l.nome}>
+                {l.nome}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="field">
           <label>Indicação</label>

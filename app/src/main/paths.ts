@@ -18,3 +18,9 @@ export function examsDir(): string {
   mkdirSync(dir, { recursive: true })
   return dir
 }
+
+export function logosDir(): string {
+  const dir = join(dataDir(), 'logos')
+  mkdirSync(dir, { recursive: true })
+  return dir
+}

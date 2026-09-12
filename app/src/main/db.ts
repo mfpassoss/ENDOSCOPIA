@@ -1,6 +1,9 @@
 import Database from 'better-sqlite3'
 import { dbPath } from './paths'
-import { SEED_TEMPLATES } from './seed'
+import { DEFAULT_LOCAL, DEFAULT_LOGO_PNG_BASE64, SEED_TEMPLATES } from './seed'
+import { logosDir } from './paths'
+import { existsSync, writeFileSync } from 'fs'
+import { join } from 'path'
 
 let db: Database.Database | null = null
 
@@ -36,6 +39,7 @@ function migrate(d: Database.Database): void {
       data TEXT NOT NULL,
       solicitante TEXT NOT NULL DEFAULT '',
       convenio TEXT NOT NULL DEFAULT '',
+      local TEXT NOT NULL DEFAULT '',
       indicacao TEXT NOT NULL DEFAULT '',
       secoes TEXT NOT NULL DEFAULT '[]',
       urease TEXT NOT NULL DEFAULT 'NAO',
@@ -63,6 +67,7 @@ function migrate(d: Database.Database): void {
       tipo TEXT NOT NULL,
       nome TEXT NOT NULL,
       titulo TEXT NOT NULL,
+      titulo_corpo TEXT NOT NULL DEFAULT '',
       secoes TEXT NOT NULL DEFAULT '[]',
       conclusao TEXT NOT NULL DEFAULT '',
       legendas TEXT NOT NULL DEFAULT '[]',
@@ -73,17 +78,22 @@ function migrate(d: Database.Database): void {
     CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   `)
 
+  // Colunas adicionadas depois da primeira versão
+  addColumn(d, 'exams', 'local', "TEXT NOT NULL DEFAULT ''")
+  addColumn(d, 'templates', 'titulo_corpo', "TEXT NOT NULL DEFAULT ''")
+
   const count = d.prepare('SELECT COUNT(*) AS n FROM templates').get() as { n: number }
   if (count.n === 0) {
     const ins = d.prepare(
-      `INSERT INTO templates (tipo, nome, titulo, secoes, conclusao, legendas, tem_urease, padrao)
-       VALUES (@tipo, @nome, @titulo, @secoes, @conclusao, @legendas, @temUrease, @padrao)`
+      `INSERT INTO templates (tipo, nome, titulo, titulo_corpo, secoes, conclusao, legendas, tem_urease, padrao)
+       VALUES (@tipo, @nome, @titulo, @tituloCorpo, @secoes, @conclusao, @legendas, @temUrease, @padrao)`
     )
     for (const t of SEED_TEMPLATES) {
       ins.run({
         tipo: t.tipo,
         nome: t.nome,
         titulo: t.titulo,
+        tituloCorpo: t.tituloCorpo,
         secoes: JSON.stringify(t.secoes),
         conclusao: t.conclusao,
         legendas: JSON.stringify(t.legendas),
@@ -92,6 +102,21 @@ function migrate(d: Database.Database): void {
       })
     }
   }
+
+  // Local padrão (hospital + logo) na primeira execução
+  const hasLocais = d.prepare("SELECT 1 FROM settings WHERE key = 'locais'").get()
+  if (!hasLocais) {
+    const logo = join(logosDir(), DEFAULT_LOCAL.logoFile)
+    if (!existsSync(logo)) writeFileSync(logo, Buffer.from(DEFAULT_LOGO_PNG_BASE64, 'base64'))
+    const put = d.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+    put.run('locais', JSON.stringify([{ id: DEFAULT_LOCAL.id, nome: DEFAULT_LOCAL.nome, logo }]))
+    put.run('localPadraoId', JSON.stringify(DEFAULT_LOCAL.id))
+  }
+}
+
+function addColumn(d: Database.Database, table: string, column: string, def: string): void {
+  const cols = d.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]
+  if (!cols.some((c) => c.name === column)) d.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`)
 }
 
 export function now(): string {
