@@ -1,0 +1,36 @@
+{
+  "name": "endolaudo",
+  "productName": "EndoLaudo",
+  "version": "0.1.0",
+  "description": "Cadastro de pacientes, captura de imagens e laudos de endoscopia digestiva",
+  "main": "./out/main/index.js",
+  "author": "Dr. Marcelo Ferraz Passos",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "postinstall": "electron-builder install-app-deps",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:dir": "electron-vite build && electron-builder --dir"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "docx": "^9.5.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}
