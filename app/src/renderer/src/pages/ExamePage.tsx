@@ -61,6 +61,7 @@ export function ExamePage({ id, initialTab, nav }: Props): JSX.Element {
   if (!exam || !patient || !settings) return <div className="muted">Carregando…</div>
 
   const tpl = templates.find((t) => t.tipo === exam.tipo && t.padrao) ?? templates.find((t) => t.tipo === exam.tipo) ?? null
+  const maxNoLaudo = tpl?.legendas.filter((l) => l.trim()).length || undefined
   const nextLabel = tpl?.legendas[photos.length] ?? ''
 
   return (
@@ -110,12 +111,15 @@ export function ExamePage({ id, initialTab, nav }: Props): JSX.Element {
           exam={exam}
           photos={photos}
           nextLabel={nextLabel}
+          maxNoLaudo={maxNoLaudo}
           settings={settings}
           setSettings={setSettings}
           reload={reloadPhotos}
         />
       )}
-      {tab === 'laudo' && <LaudoTab exam={exam} patch={patch} templates={templates.filter((t) => t.tipo === exam.tipo)} photos={photos} setExam={setExam} />}
+      {tab === 'laudo' && (
+        <LaudoTab exam={exam} patch={patch} templates={templates.filter((t) => t.tipo === exam.tipo)} photos={photos} maxNoLaudo={maxNoLaudo} setExam={setExam} />
+      )}
 
       {editPatient && (
         <PatientForm
@@ -248,6 +252,7 @@ function ImagensTab({
   exam,
   photos,
   nextLabel,
+  maxNoLaudo,
   settings,
   setSettings,
   reload
@@ -255,6 +260,7 @@ function ImagensTab({
   exam: Exam
   photos: Photo[]
   nextLabel: string
+  maxNoLaudo?: number
   settings: Settings
   setSettings: (s: Settings) => void
   reload: () => void
@@ -380,9 +386,18 @@ function ImagensTab({
       </div>
 
       <div className="card">
-        <h2>Fotos do exame ({photos.length})</h2>
+        <h2>
+          Fotos do exame ({photos.length}
+          {maxNoLaudo ? ` · ${Math.min(photos.length, maxNoLaudo)} de ${maxNoLaudo} no laudo` : ''})
+        </h2>
+        {maxNoLaudo != null && photos.length > maxNoLaudo && (
+          <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+            O modelo tem {maxNoLaudo} posições. As fotos além disso ficam só na pasta do exame. Arraste para escolher quais entram.
+          </p>
+        )}
         <PhotoGrid
           photos={photos}
+          maxNoLaudo={maxNoLaudo}
           onLabel={async (pid, legenda) => {
             await window.api.photos.update(pid, { legenda })
             reload()
@@ -408,12 +423,14 @@ function LaudoTab({
   patch,
   templates,
   photos,
+  maxNoLaudo,
   setExam
 }: {
   exam: Exam
   patch: (p: Partial<Exam>) => void
   templates: Template[]
   photos: Photo[]
+  maxNoLaudo?: number
   setExam: (e: Exam) => void
 }): JSX.Element {
   const toast = useToast()
@@ -464,7 +481,7 @@ function LaudoTab({
           ) : (
             'Laudo ainda não gerado.'
           )}{' '}
-          · {photos.length} foto(s) serão incluídas.
+          · {maxNoLaudo ? Math.min(photos.length, maxNoLaudo) : photos.length} foto(s) serão incluídas.
         </span>
         <span className="spacer" />
         <select onChange={(e) => e.target.value && applyTemplate(Number(e.target.value))} value="">

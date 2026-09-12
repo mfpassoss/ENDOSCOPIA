@@ -4,12 +4,14 @@ import { fotoUrl } from '../util'
 
 interface Props {
   photos: Photo[]
+  /** Quantidade de fotos que entram no laudo (as demais ficam só na pasta do exame). */
+  maxNoLaudo?: number
   onLabel: (id: number, legenda: string) => void
   onReorder: (ids: number[]) => void
   onRemove: (id: number) => void
 }
 
-export function PhotoGrid({ photos, onLabel, onReorder, onRemove }: Props): JSX.Element {
+export function PhotoGrid({ photos, maxNoLaudo, onLabel, onReorder, onRemove }: Props): JSX.Element {
   const [drag, setDrag] = useState<number | null>(null)
   const [over, setOver] = useState<number | null>(null)
 
@@ -32,7 +34,8 @@ export function PhotoGrid({ photos, onLabel, onReorder, onRemove }: Props): JSX.
       {photos.map((p, i) => (
         <div
           key={p.id}
-          className={'photo' + (drag === p.id ? ' dragging' : '') + (over === p.id ? ' over' : '')}
+          className={'photo' + (drag === p.id ? ' dragging' : '') + (over === p.id ? ' over' : '') + (maxNoLaudo != null && i >= maxNoLaudo ? ' fora' : '')}
+          title={maxNoLaudo != null && i >= maxNoLaudo ? 'Não entra no laudo (além das legendas do modelo)' : undefined}
           draggable
           onDragStart={() => setDrag(p.id)}
           onDragEnd={() => {
@@ -45,7 +48,7 @@ export function PhotoGrid({ photos, onLabel, onReorder, onRemove }: Props): JSX.
           }}
           onDrop={() => drop(p.id)}
         >
-          <span className="n">{i + 1}</span>
+          <span className="n">{maxNoLaudo != null && i >= maxNoLaudo ? 'fora do laudo' : i + 1}</span>
           <button className="del" title="Excluir foto" onClick={() => onRemove(p.id)}>
             ×
           </button>

@@ -240,7 +240,9 @@ export async function generateReport(examId: number): Promise<{ path: string }> 
   if (!patient) throw new Error('Paciente não encontrado')
   const cfg = settingsRepo.get()
   const tpl = templates.defaultFor(exam.tipo)
-  const fotos = photoRepo.list(examId)
+  // Só entram no laudo as fotos que têm posição no modelo (ex.: 9 legendas → 9 fotos)
+  const maxFotos = tpl?.legendas.filter((l) => l.trim()).length || Infinity
+  const fotos = photoRepo.list(examId).slice(0, maxFotos)
   const temLogo = !!logoFor(exam, cfg)
 
   const body: (Paragraph | Table)[] = []

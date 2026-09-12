@@ -121,6 +121,8 @@ table.list tr.clickable:hover td { background: #f3f8fd; }
 .photo { background: #fff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; position: relative; }
 .photo.dragging { opacity: .4; }
 .photo.over { outline: 2px solid var(--accent); }
+.photo.fora { opacity: .55; }
+.photo.fora .n { background: var(--warn); }
 .photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: #111; cursor: grab; }
 .photo input { border: 0; border-top: 1px solid var(--border); padding: 8px; width: 100%; text-align: center; font-weight: 600; font-size: 12px; text-transform: uppercase; }
 .photo .n { position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,.65); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }

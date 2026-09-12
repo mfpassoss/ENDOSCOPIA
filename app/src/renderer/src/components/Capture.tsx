@@ -147,7 +147,7 @@ export function Capture({ examId, nextLabel, deviceId, onDevice, onCaptured }: P
           <span className="muted" style={{ fontSize: 12 }}>
             Próxima foto
           </span>
-          <b>{nextLabel || 'Foto adicional'}</b>
+          <b>{nextLabel || 'Foto adicional (não entra no laudo)'}</b>
         </div>
         <button className="btn accent lg" onClick={capture} disabled={status !== 'live' || busy}>
           📷 Capturar
