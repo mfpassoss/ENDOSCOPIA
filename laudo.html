@@ -21,7 +21,11 @@
   .info{background:#eef5ea;border:1px solid #b9d3ad;color:#2f4d26;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
   .rodape{font-size:12px;color:#777;margin-top:22px;line-height:1.4}
   .oculto{display:none !important}
-  a.baixar{display:block;text-align:center;margin-top:14px;font-weight:700;color:#2f6b1f}
+  .acoes{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .acoes a,.acoes button{display:block;text-align:center;text-decoration:none;font-size:17px;font-weight:700;padding:14px;border-radius:10px;margin:0}
+  .acoes .salvar{background:#2f6b1f;color:#fff}
+  .acoes .zap{background:#25d366;color:#fff}
+  .acoes .abrir{background:#eef5ea;color:#2f6b1f;border:1px solid #b9d3ad}
 </style>
 </head>
 <body>
@@ -35,7 +39,11 @@
     <button type="submit" id="btn">Ver meu laudo</button>
   </form>
   <div id="msg" class="oculto"></div>
-  <a id="baixar" class="baixar oculto" href="#" target="_blank" rel="noopener">Se o laudo não abriu, toque aqui</a>
+  <div id="acoes" class="acoes oculto">
+    <a id="salvar" class="salvar" href="#">⬇ Salvar no celular (PDF)</a>
+    <button type="button" id="zap" class="zap">Enviar pelo WhatsApp</button>
+    <a id="abrir" class="abrir" href="#" target="_blank" rel="noopener">Abrir o laudo na tela</a>
+  </div>
   <p class="rodape">Este acesso é pessoal. O laudo abre em PDF e pode ser salvo no seu celular. Em caso de dúvida sobre o resultado, procure o médico que pediu o exame.</p>
 </div>
 <script>
@@ -80,19 +88,41 @@
     return m[3] + '-' + m[2] + '-' + m[1];
   }
 
+  // WhatsApp: pelo compartilhamento do celular vai o PDF de verdade; sem suporte, vai o link desta página
+  function compartilhar(url, nome) {
+    var btn = $('zap'); btn.disabled = true; btn.textContent = 'Preparando…';
+    var fallback = function () {
+      btn.disabled = false; btn.textContent = 'Enviar pelo WhatsApp';
+      var texto = 'Meu laudo de exame: ' + location.href;
+      location.href = 'https://wa.me/?text=' + encodeURIComponent(texto);
+    };
+    if (!navigator.share || !navigator.canShare) return fallback();
+    fetch(url).then(function (r) { if (!r.ok) throw new Error('x'); return r.blob(); }).then(function (blob) {
+      var file = new File([blob], nome, { type: 'application/pdf' });
+      if (!navigator.canShare({ files: [file] })) return fallback();
+      return navigator.share({ files: [file], title: 'Laudo do exame' }).catch(function () {}).then(function () {
+        btn.disabled = false; btn.textContent = 'Enviar pelo WhatsApp';
+      });
+    }).catch(fallback);
+  }
+
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     var iso = isoDe($('nasc').value);
     if (!iso) { mostrar('msg', 'Digite a data completa, no formato dd/mm/aaaa.', 'erro'); return; }
-    $('btn').disabled = true; $('msg').classList.add('oculto'); $('baixar').classList.add('oculto');
+    $('btn').disabled = true; $('msg').classList.add('oculto'); $('acoes').classList.add('oculto');
     fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ t: t, nasc: iso }) })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         $('btn').disabled = false;
         if (d.ok && d.url) {
-          $('baixar').href = d.url; $('baixar').classList.remove('oculto');
-          mostrar('msg', 'Abrindo o laudo…', 'info');
-          location.href = d.url;
+          $('form').classList.add('oculto');
+          mostrar('msg', 'Laudo liberado. Escolha o que fazer:', 'info');
+          var nome = d.arquivo || 'Laudo.pdf';
+          $('salvar').href = d.url + (d.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nome);
+          $('abrir').href = d.url;
+          $('acoes').classList.remove('oculto');
+          $('zap').onclick = function () { compartilhar(d.url, nome); };
           return;
         }
         if (d.estado === 'nasc') return mostrar('msg', d.msg, 'erro');
