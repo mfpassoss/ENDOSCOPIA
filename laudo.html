@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Laudo do exame</title>
+<style>
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f3f6f4;color:#17301f}
+  .box{max-width:440px;margin:24px auto;background:#fff;border-radius:16px;padding:28px 24px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  h1{font-size:20px;margin:0 0 6px;color:#2f6b1f}
+  .sub{color:#555;font-size:14px;margin:0 0 18px}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  input[type=date]{width:100%;box-sizing:border-box;font-size:18px;padding:12px;border:1px solid #c9d3cc;border-radius:10px}
+  button{width:100%;margin-top:16px;font-size:17px;font-weight:700;padding:14px;border:0;border-radius:10px;background:#2f6b1f;color:#fff}
+  button[disabled]{opacity:.6}
+  .erro{background:#fdecec;border:1px solid #e57373;color:#8a1c1c;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
+  .info{background:#eef5ea;border:1px solid #b9d3ad;color:#2f4d26;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
+  .rodape{font-size:12px;color:#777;margin-top:22px;line-height:1.4}
+  .oculto{display:none}
+  a.baixar{display:block;text-align:center;margin-top:14px;font-weight:700;color:#2f6b1f}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1 id="titulo">Laudo do exame</h1>
+  <p class="sub" id="sub">Carregando…</p>
+  <form id="form" class="oculto">
+    <label for="nasc">Confirme sua data de nascimento</label>
+    <input id="nasc" name="nasc" type="date" required>
+    <button type="submit" id="btn">Ver meu laudo</button>
+  </form>
+  <div id="msg" class="oculto"></div>
+  <a id="baixar" class="baixar oculto" href="#" target="_blank" rel="noopener">Se o laudo não abriu, toque aqui</a>
+  <p class="rodape">Este acesso é pessoal. O laudo abre em PDF e pode ser salvo no seu celular. Em caso de dúvida sobre o resultado, procure o médico que pediu o exame.</p>
+</div>
+<script>
+(function () {
+  var API = 'https://plehqstkkrfjixnhgpkl.supabase.co/functions/v1/laudo';
+  var t = new URLSearchParams(location.search).get('t') || '';
+  var $ = function (id) { return document.getElementById(id); };
+  function mostrar(id, texto, classe) {
+    var el = $(id); el.textContent = texto; el.className = classe || ''; el.classList.remove('oculto');
+  }
+  function falha(texto) { $('form').classList.add('oculto'); mostrar('msg', texto, 'info'); }
+
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(t)) {
+    $('sub').textContent = '';
+    falha('Este endereço não corresponde a nenhum exame. Confira o código impresso no termo.');
+    return;
+  }
+
+  fetch(API + '?t=' + encodeURIComponent(t), { headers: { accept: 'application/json' } })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.ok) { $('sub').textContent = ''; return falha(d.msg || 'Laudo indisponível.'); }
+      $('sub').textContent = d.exame + (d.hospital ? ' · ' + d.hospital : '');
+      $('form').classList.remove('oculto');
+      $('nasc').focus();
+    })
+    .catch(function () { $('sub').textContent = ''; falha('Sem conexão com o servidor. Verifique a internet e tente de novo.'); });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('btn').disabled = true; $('msg').classList.add('oculto'); $('baixar').classList.add('oculto');
+    fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ t: t, nasc: $('nasc').value }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        $('btn').disabled = false;
+        if (d.ok && d.url) {
+          $('baixar').href = d.url; $('baixar').classList.remove('oculto');
+          mostrar('msg', 'Abrindo o laudo…', 'info');
+          location.href = d.url;
+          return;
+        }
+        if (d.estado === 'nasc') return mostrar('msg', d.msg, 'erro');
+        falha(d.msg || 'Não foi possível abrir o laudo.');
+      })
+      .catch(function () { $('btn').disabled = false; mostrar('msg', 'Sem conexão com o servidor. Tente de novo.', 'erro'); });
+  });
+})();
+</script>
+</body>
+</html>
