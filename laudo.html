@@ -6,18 +6,21 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Laudo do exame</title>
 <style>
-  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f3f6f4;color:#17301f}
-  .box{max-width:440px;margin:24px auto;background:#fff;border-radius:16px;padding:28px 24px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f3f6f4;color:#17301f}
+  .box{max-width:440px;width:100%;margin:8px auto;background:#fff;border-radius:16px;padding:24px 20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
   h1{font-size:20px;margin:0 0 6px;color:#2f6b1f}
   .sub{color:#555;font-size:14px;margin:0 0 18px}
   label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
-  input[type=date]{width:100%;box-sizing:border-box;font-size:18px;padding:12px;border:1px solid #c9d3cc;border-radius:10px}
+  input[type=text]{width:100%;font-size:22px;letter-spacing:1px;text-align:center;padding:12px;border:1px solid #c9d3cc;border-radius:10px;background:#fff;color:#17301f}
+  input[type=text]:focus{outline:2px solid #2f6b1f;border-color:#2f6b1f}
+  .dica{font-size:12px;color:#777;margin:6px 0 0}
   button{width:100%;margin-top:16px;font-size:17px;font-weight:700;padding:14px;border:0;border-radius:10px;background:#2f6b1f;color:#fff}
   button[disabled]{opacity:.6}
   .erro{background:#fdecec;border:1px solid #e57373;color:#8a1c1c;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
   .info{background:#eef5ea;border:1px solid #b9d3ad;color:#2f4d26;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
   .rodape{font-size:12px;color:#777;margin-top:22px;line-height:1.4}
-  .oculto{display:none}
+  .oculto{display:none !important}
   a.baixar{display:block;text-align:center;margin-top:14px;font-weight:700;color:#2f6b1f}
 </style>
 </head>
@@ -27,7 +30,8 @@
   <p class="sub" id="sub">Carregando…</p>
   <form id="form" class="oculto">
     <label for="nasc">Confirme sua data de nascimento</label>
-    <input id="nasc" name="nasc" type="date" required>
+    <input id="nasc" name="nasc" type="text" inputmode="numeric" autocomplete="bday" placeholder="dd/mm/aaaa" maxlength="10" required>
+    <p class="dica">Só os números: dia, mês e ano com 4 dígitos (ex.: 06091953).</p>
     <button type="submit" id="btn">Ver meu laudo</button>
   </form>
   <div id="msg" class="oculto"></div>
@@ -60,10 +64,28 @@
     })
     .catch(function () { $('sub').textContent = ''; falha('Sem conexão com o servidor. Verifique a internet e tente de novo.'); });
 
+  // Máscara dd/mm/aaaa: só dígitos, barras entram sozinhas
+  $('nasc').addEventListener('input', function () {
+    var d = this.value.replace(/\D/g, '').slice(0, 8);
+    var v = d;
+    if (d.length > 4) v = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4);
+    else if (d.length > 2) v = d.slice(0, 2) + '/' + d.slice(2);
+    this.value = v;
+  });
+  function isoDe(v) {
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+    if (!m) return null;
+    var dia = +m[1], mes = +m[2], ano = +m[3];
+    if (dia < 1 || dia > 31 || mes < 1 || mes > 12 || ano < 1900 || ano > 2100) return null;
+    return m[3] + '-' + m[2] + '-' + m[1];
+  }
+
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
+    var iso = isoDe($('nasc').value);
+    if (!iso) { mostrar('msg', 'Digite a data completa, no formato dd/mm/aaaa.', 'erro'); return; }
     $('btn').disabled = true; $('msg').classList.add('oculto'); $('baixar').classList.add('oculto');
-    fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ t: t, nasc: $('nasc').value }) })
+    fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ t: t, nasc: iso }) })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         $('btn').disabled = false;
