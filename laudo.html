@@ -155,6 +155,24 @@
           Abrir o laudo na tela
         </a>
       </div>
+
+      <div id="anatomo" class="oculto" style="margin-top:22px;padding-top:16px;border-top:1px dashed var(--line)">
+        <div class="liberado">
+          <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 3h3v15H5V6h3z"/><path d="M9 13l2 2 4-4"/></svg></div>
+          <div><b>Resultado da biópsia</b><span>Anatomopatológico enviado pelo laboratório.</span></div>
+        </div>
+        <div class="acoes">
+          <a id="salvarAnatomo" class="btn primary" style="margin-top:0" href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            Salvar a biópsia (PDF)
+          </a>
+          <button type="button" id="zapAnatomo" class="btn zap">Enviar a biópsia pelo WhatsApp</button>
+          <a id="abrirAnatomo" class="btn ghost" href="#" target="_blank" rel="noopener">Abrir a biópsia na tela</a>
+        </div>
+      </div>
+      <div id="biopsiaPendente" class="msg info oculto" style="margin-top:18px">
+        <b>Biópsia:</b> o resultado do laboratório ainda não chegou. Volte a este mesmo código em alguns dias; ele aparece aqui, logo abaixo do laudo.
+      </div>
     </div>
 
     <div id="msg" class="msg oculto" role="status" aria-live="polite"></div>
@@ -210,9 +228,10 @@
   }
 
   // WhatsApp: pelo compartilhamento do celular vai o PDF de verdade; sem suporte, vai o link desta página
-  function compartilhar(url, nome) {
-    var btn = $('zap'); btn.disabled = true; btn.lastChild.textContent = ' Preparando…';
-    var restaurar = function () { btn.disabled = false; btn.lastChild.textContent = ' Enviar pelo WhatsApp'; };
+  function compartilhar(btn, url, nome) {
+    var rotulo = btn.lastChild.textContent;
+    btn.disabled = true; btn.lastChild.textContent = ' Preparando…';
+    var restaurar = function () { btn.disabled = false; btn.lastChild.textContent = rotulo; };
     var fallback = function () {
       restaurar();
       location.href = 'https://wa.me/?text=' + encodeURIComponent('Meu laudo de exame: ' + location.href);
@@ -239,7 +258,16 @@
           var nome = d.arquivo || 'Laudo.pdf';
           $('salvar').href = d.url + (d.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nome);
           $('abrir').href = d.url;
-          $('zap').onclick = function () { compartilhar(d.url, nome); };
+          $('zap').onclick = function () { compartilhar($('zap'), d.url, nome); };
+          if (d.urlAnatomo) {
+            var nomeA = d.arquivoAnatomo || 'Biopsia.pdf';
+            $('salvarAnatomo').href = d.urlAnatomo + (d.urlAnatomo.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nomeA);
+            $('abrirAnatomo').href = d.urlAnatomo;
+            $('zapAnatomo').onclick = function () { compartilhar($('zapAnatomo'), d.urlAnatomo, nomeA); };
+            $('anatomo').classList.remove('oculto');
+          } else if (d.biopsia) {
+            $('biopsiaPendente').classList.remove('oculto');
+          }
           $('pronto').classList.remove('oculto');
           return;
         }
