@@ -4,60 +4,181 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Laudo do exame</title>
+<meta name="theme-color" content="#0f3d3e">
+<title>Portal do Paciente · Laudo do exame</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  :root{
+    --ink:#0f3d3e; --ink-2:#17595a; --mint:#8fd3b6; --mint-2:#cdeedd;
+    --paper:#f7f4ee; --card:#ffffff; --text:#1d2a2a; --muted:#5f6f6e; --line:#d9e2df;
+    --ok:#1f7a4d; --warn:#b4511a; --warn-bg:#fdf1ea; --info-bg:#eef7f2;
+    --zap:#1faa5a;
+  }
   *{box-sizing:border-box}
-  body{margin:0;padding:16px;font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#f3f6f4;color:#17301f}
-  .box{max-width:440px;width:100%;margin:8px auto;background:#fff;border-radius:16px;padding:24px 20px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-  h1{font-size:20px;margin:0 0 6px;color:#2f6b1f}
-  .sub{color:#555;font-size:14px;margin:0 0 18px}
-  label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
-  input[type=text]{width:100%;font-size:22px;letter-spacing:1px;text-align:center;padding:12px;border:1px solid #c9d3cc;border-radius:10px;background:#fff;color:#17301f}
-  input[type=text]:focus{outline:2px solid #2f6b1f;border-color:#2f6b1f}
-  .dica{font-size:12px;color:#777;margin:6px 0 0}
-  button{width:100%;margin-top:16px;font-size:17px;font-weight:700;padding:14px;border:0;border-radius:10px;background:#2f6b1f;color:#fff}
-  button[disabled]{opacity:.6}
-  .erro{background:#fdecec;border:1px solid #e57373;color:#8a1c1c;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
-  .info{background:#eef5ea;border:1px solid #b9d3ad;color:#2f4d26;padding:10px 12px;border-radius:10px;font-size:14px;margin-top:14px}
-  .rodape{font-size:12px;color:#777;margin-top:22px;line-height:1.4}
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;font-family:"Public Sans",system-ui,sans-serif;color:var(--text);font-size:17px;line-height:1.5;
+    background:
+      radial-gradient(900px 500px at 10% -10%, #1f6b6a 0%, transparent 60%),
+      radial-gradient(700px 420px at 100% 0%, #2d8f7c 0%, transparent 55%),
+      linear-gradient(180deg, var(--ink) 0 46%, var(--paper) 46% 100%);
+    background-attachment:fixed;
+  }
+  body::before{ /* grão sutil */
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='.9'/></svg>");
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:28px 18px 40px;position:relative}
+  /* marca */
+  .brand{display:flex;align-items:center;gap:14px;color:#fff;animation:up .6s ease both}
+  .brand svg{width:54px;height:54px;flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
+  .brand .t1{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:.2px;line-height:1.1}
+  .brand .t2{font-size:13px;opacity:.82;letter-spacing:.6px;text-transform:uppercase;margin-top:3px}
+  h1{font-family:"Fraunces",serif;font-weight:500;font-size:34px;line-height:1.08;color:#fff;margin:30px 0 8px;animation:up .6s .08s ease both}
+  .lead{color:#dbe9e4;margin:0 0 22px;font-size:16px;animation:up .6s .14s ease both}
+  /* cartão */
+  .card{
+    background:var(--card);border-radius:22px;padding:26px 22px 22px;position:relative;
+    box-shadow:0 24px 50px -20px rgba(8,40,40,.45), 0 2px 0 rgba(255,255,255,.6) inset;
+    animation:up .7s .2s ease both;
+  }
+  .card::before{content:"";position:absolute;left:22px;right:22px;top:0;height:4px;border-radius:0 0 6px 6px;background:linear-gradient(90deg,var(--mint),var(--ink-2))}
+  .exame{display:flex;align-items:flex-start;gap:12px;padding-bottom:18px;border-bottom:1px dashed var(--line);margin-bottom:18px}
+  .exame .ic{width:42px;height:42px;border-radius:12px;background:var(--mint-2);display:grid;place-items:center;flex:none;color:var(--ink)}
+  .exame .k{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .exame .v{font-family:"Fraunces",serif;font-size:21px;line-height:1.2;color:var(--ink);font-weight:600}
+  .exame .h{font-size:14px;color:var(--muted);margin-top:2px}
+  .skel{height:18px;border-radius:6px;background:linear-gradient(90deg,#eef1ef,#f8f9f8,#eef1ef);background-size:200% 100%;animation:sh 1.2s linear infinite}
+  label{display:block;font-weight:700;font-size:16px;margin:0 0 8px;color:var(--ink)}
+  .campo{position:relative}
+  input[type=text]{
+    width:100%;font-family:"Public Sans",system-ui,sans-serif;font-size:28px;letter-spacing:2px;text-align:center;font-weight:600;color:var(--ink);
+    padding:14px 12px;border:2px solid var(--line);border-radius:14px;background:#fbfcfb;transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]::placeholder{color:#b9c4c1;font-weight:400;letter-spacing:1px}
+  input[type=text]:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 4px rgba(23,89,90,.15)}
+  .dica{font-size:14px;color:var(--muted);margin:8px 0 0}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin:0;border:0;cursor:pointer;text-decoration:none;
+    font-family:"Public Sans",system-ui,sans-serif;font-size:18px;font-weight:700;padding:16px 18px;border-radius:14px;
+    transition:transform .08s, box-shadow .15s, filter .15s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.6;cursor:default}
+  .btn.primary{background:var(--ink);color:#fff;box-shadow:0 10px 24px -10px rgba(15,61,62,.7);margin-top:18px}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.zap{background:var(--zap);color:#fff;box-shadow:0 10px 24px -12px rgba(31,170,90,.8)}
+  .btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
+  .btn svg{width:22px;height:22px;flex:none}
+  .acoes{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .msg{padding:12px 14px;border-radius:12px;font-size:15px;margin-top:14px;line-height:1.45}
+  .msg.erro{background:var(--warn-bg);color:var(--warn);border:1px solid #f0c9b3}
+  .msg.info{background:var(--info-bg);color:var(--ok);border:1px solid #bfe3cf}
+  .liberado{display:flex;align-items:center;gap:12px;margin:2px 0 16px}
+  .liberado .check{width:44px;height:44px;border-radius:50%;background:var(--mint-2);display:grid;place-items:center;color:var(--ok);flex:none;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+  .liberado b{font-family:"Fraunces",serif;font-size:21px;color:var(--ink);font-weight:600;display:block;line-height:1.15}
+  .liberado span{font-size:14px;color:var(--muted)}
+  .rodape{margin-top:22px;font-size:13px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
+  .rodape b{color:var(--ink)}
+  .selo{display:flex;justify-content:center;gap:16px;margin-top:22px;font-size:12px;color:#c9d9d4;letter-spacing:.3px;animation:up .7s .3s ease both}
+  .selo span{display:flex;align-items:center;gap:6px}
   .oculto{display:none !important}
-  .acoes{margin-top:14px;display:flex;flex-direction:column;gap:10px}
-  .acoes a,.acoes button{display:block;text-align:center;text-decoration:none;font-size:17px;font-weight:700;padding:14px;border-radius:10px;margin:0}
-  .acoes .salvar{background:#2f6b1f;color:#fff}
-  .acoes .zap{background:#25d366;color:#fff}
-  .acoes .abrir{background:#eef5ea;color:#2f6b1f;border:1px solid #b9d3ad}
+  @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes sh{to{background-position:-200% 0}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+  @media (min-width:600px){.wrap{padding-top:44px}h1{font-size:40px}}
 </style>
 </head>
 <body>
-<div class="box">
-  <h1 id="titulo">Laudo do exame</h1>
-  <p class="sub" id="sub">Carregando…</p>
-  <form id="form" class="oculto">
-    <label for="nasc">Confirme sua data de nascimento</label>
-    <input id="nasc" name="nasc" type="text" inputmode="numeric" autocomplete="bday" placeholder="dd/mm/aaaa" maxlength="10" required>
-    <p class="dica">Só os números: dia, mês e ano com 4 dígitos (ex.: 06091953).</p>
-    <button type="submit" id="btn">Ver meu laudo</button>
-  </form>
-  <div id="msg" class="oculto"></div>
-  <div id="acoes" class="acoes oculto">
-    <a id="salvar" class="salvar" href="#">⬇ Salvar no celular / computador (PDF)</a>
-    <button type="button" id="zap" class="zap">Enviar pelo WhatsApp</button>
-    <a id="abrir" class="abrir" href="#" target="_blank" rel="noopener">Abrir o laudo na tela</a>
+<div class="wrap">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fe0c3"/><stop offset="1" stop-color="#2d8f7c"/></linearGradient></defs>
+      <circle cx="32" cy="32" r="30" fill="url(#g)"/>
+      <circle cx="32" cy="32" r="30" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
+      <path d="M19 40c0-9 6-15 13-15s11 5 11 11-4 9-8 9-6-3-6-6 2-5 5-5" fill="none" stroke="#0f3d3e" stroke-width="3.2" stroke-linecap="round"/>
+      <circle cx="34" cy="34" r="2.2" fill="#0f3d3e"/>
+      <path d="M19 40v4" stroke="#0f3d3e" stroke-width="3.2" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="t1">Portal do Paciente</div>
+      <div class="t2">Dr. Marcelo Ferraz Passos · Endoscopia digestiva</div>
+    </div>
   </div>
-  <p class="rodape">Este acesso é pessoal. O laudo abre em PDF e pode ser salvo no seu celular. Em caso de dúvida sobre o resultado, procure o médico que pediu o exame.</p>
+
+  <h1>Seu laudo, no seu celular.</h1>
+  <p class="lead">Confirme sua data de nascimento para abrir o resultado do exame.</p>
+
+  <div class="card">
+    <div class="exame">
+      <div class="ic" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="k">Exame</div>
+        <div class="v" id="exame"><div class="skel" style="width:70%"></div></div>
+        <div class="h" id="hospital"><div class="skel" style="width:45%;height:12px;margin-top:6px"></div></div>
+      </div>
+    </div>
+
+    <form id="form" class="oculto" novalidate>
+      <label for="nasc">Data de nascimento</label>
+      <div class="campo">
+        <input id="nasc" name="nasc" type="text" inputmode="numeric" autocomplete="bday" placeholder="dd/mm/aaaa" maxlength="10" required aria-describedby="dica">
+      </div>
+      <p class="dica" id="dica">Digite só os números: dia, mês e ano com 4 dígitos. Ex.: 06091953.</p>
+      <button type="submit" id="btn" class="btn primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Ver meu laudo
+      </button>
+    </form>
+
+    <div id="pronto" class="oculto">
+      <div class="liberado">
+        <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <div><b>Laudo liberado</b><span>Escolha o que fazer com o arquivo PDF.</span></div>
+      </div>
+      <div class="acoes">
+        <a id="salvar" class="btn primary" style="margin-top:0" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Salvar no celular / computador (PDF)
+        </a>
+        <button type="button" id="zap" class="btn zap">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2m0 1.67c4.54 0 8.24 3.7 8.24 8.24s-3.7 8.24-8.24 8.24c-1.5 0-2.97-.41-4.25-1.18l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.35c0-4.54 3.7-8.24 8.24-8.24M8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1 2.56.14.17 1.76 2.67 4.25 3.73.59.27 1.05.42 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.16-.48-.27-.25-.14-1.47-.74-1.69-.82-.23-.08-.37-.12-.56.12-.16.25-.64.81-.78.97-.15.17-.29.19-.53.07-.26-.13-1.06-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.12-.24-.01-.39.11-.5.11-.11.27-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43-.14 0-.3-.01-.47-.01"/></svg>
+          Enviar pelo WhatsApp
+        </button>
+        <a id="abrir" class="btn ghost" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          Abrir o laudo na tela
+        </a>
+      </div>
+    </div>
+
+    <div id="msg" class="msg oculto" role="status" aria-live="polite"></div>
+
+    <p class="rodape"><b>Acesso pessoal e protegido.</b> Ninguém vê este laudo sem o código impresso no seu termo e a sua data de nascimento. Em caso de dúvida sobre o resultado, procure o médico que pediu o exame.</p>
+  </div>
+
+  <div class="selo">
+    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Conexão segura</span>
+    <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Dados conforme a LGPD</span>
+  </div>
 </div>
+
 <script>
 (function () {
   var API = 'https://plehqstkkrfjixnhgpkl.supabase.co/functions/v1/laudo';
   var t = new URLSearchParams(location.search).get('t') || '';
   var $ = function (id) { return document.getElementById(id); };
-  function mostrar(id, texto, classe) {
-    var el = $(id); el.textContent = texto; el.className = classe || ''; el.classList.remove('oculto');
-  }
-  function falha(texto) { $('form').classList.add('oculto'); mostrar('msg', texto, 'info'); }
+  function mostrar(texto, classe) { var el = $('msg'); el.textContent = texto; el.className = 'msg ' + (classe || 'info'); }
+  function falha(texto) { $('form').classList.add('oculto'); $('pronto').classList.add('oculto'); mostrar(texto, 'info'); }
+  function cabecalho(exame, hospital) { $('exame').textContent = exame || '—'; $('hospital').textContent = hospital || ''; }
 
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(t)) {
-    $('sub').textContent = '';
+    cabecalho('Código não encontrado', '');
     falha('Este endereço não corresponde a nenhum exame. Confira o código impresso no termo.');
     return;
   }
@@ -65,12 +186,12 @@
   fetch(API + '?t=' + encodeURIComponent(t), { headers: { accept: 'application/json' } })
     .then(function (r) { return r.json(); })
     .then(function (d) {
-      if (!d.ok) { $('sub').textContent = ''; return falha(d.msg || 'Laudo indisponível.'); }
-      $('sub').textContent = d.exame + (d.hospital ? ' · ' + d.hospital : '');
+      if (!d.ok) { cabecalho('Laudo indisponível', ''); return falha(d.msg || 'Laudo indisponível.'); }
+      cabecalho(d.exame, d.hospital);
       $('form').classList.remove('oculto');
       $('nasc').focus();
     })
-    .catch(function () { $('sub').textContent = ''; falha('Sem conexão com o servidor. Verifique a internet e tente de novo.'); });
+    .catch(function () { cabecalho('Sem conexão', ''); falha('Sem conexão com o servidor. Verifique a internet e tente de novo.'); });
 
   // Máscara dd/mm/aaaa: só dígitos, barras entram sozinhas
   $('nasc').addEventListener('input', function () {
@@ -90,45 +211,42 @@
 
   // WhatsApp: pelo compartilhamento do celular vai o PDF de verdade; sem suporte, vai o link desta página
   function compartilhar(url, nome) {
-    var btn = $('zap'); btn.disabled = true; btn.textContent = 'Preparando…';
+    var btn = $('zap'); btn.disabled = true; btn.lastChild.textContent = ' Preparando…';
+    var restaurar = function () { btn.disabled = false; btn.lastChild.textContent = ' Enviar pelo WhatsApp'; };
     var fallback = function () {
-      btn.disabled = false; btn.textContent = 'Enviar pelo WhatsApp';
-      var texto = 'Meu laudo de exame: ' + location.href;
-      location.href = 'https://wa.me/?text=' + encodeURIComponent(texto);
+      restaurar();
+      location.href = 'https://wa.me/?text=' + encodeURIComponent('Meu laudo de exame: ' + location.href);
     };
     if (!navigator.share || !navigator.canShare) return fallback();
     fetch(url).then(function (r) { if (!r.ok) throw new Error('x'); return r.blob(); }).then(function (blob) {
       var file = new File([blob], nome, { type: 'application/pdf' });
       if (!navigator.canShare({ files: [file] })) return fallback();
-      return navigator.share({ files: [file], title: 'Laudo do exame' }).catch(function () {}).then(function () {
-        btn.disabled = false; btn.textContent = 'Enviar pelo WhatsApp';
-      });
+      return navigator.share({ files: [file], title: 'Laudo do exame' }).catch(function () {}).then(restaurar);
     }).catch(fallback);
   }
 
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     var iso = isoDe($('nasc').value);
-    if (!iso) { mostrar('msg', 'Digite a data completa, no formato dd/mm/aaaa.', 'erro'); return; }
-    $('btn').disabled = true; $('msg').classList.add('oculto'); $('acoes').classList.add('oculto');
+    if (!iso) { mostrar('Digite a data completa, no formato dd/mm/aaaa.', 'erro'); return; }
+    $('btn').disabled = true; $('msg').classList.add('oculto');
     fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' }, body: JSON.stringify({ t: t, nasc: iso }) })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         $('btn').disabled = false;
         if (d.ok && d.url) {
           $('form').classList.add('oculto');
-          mostrar('msg', 'Laudo liberado. Escolha o que fazer:', 'info');
           var nome = d.arquivo || 'Laudo.pdf';
           $('salvar').href = d.url + (d.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nome);
           $('abrir').href = d.url;
-          $('acoes').classList.remove('oculto');
           $('zap').onclick = function () { compartilhar(d.url, nome); };
+          $('pronto').classList.remove('oculto');
           return;
         }
-        if (d.estado === 'nasc') return mostrar('msg', d.msg, 'erro');
+        if (d.estado === 'nasc') return mostrar(d.msg, 'erro');
         falha(d.msg || 'Não foi possível abrir o laudo.');
       })
-      .catch(function () { $('btn').disabled = false; mostrar('msg', 'Sem conexão com o servidor. Tente de novo.', 'erro'); });
+      .catch(function () { $('btn').disabled = false; mostrar('Sem conexão com o servidor. Tente de novo.', 'erro'); });
   });
 })();
 </script>
