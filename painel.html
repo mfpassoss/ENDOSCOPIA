@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0f3d3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EndoLaudo">
+<title>EndoLaudo · Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<style>
+  :root{--ink:#0f3d3e;--ink-2:#17595a;--mint:#8fd3b6;--mint-2:#cdeedd;--paper:#f7f4ee;--card:#fff;--text:#1d2a2a;--muted:#5f6f6e;--line:#d9e2df;--ok:#1f7a4d;--warn:#b4511a;--warn-bg:#fdf1ea;--info-bg:#eef7f2;--zap:#1faa5a}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{min-height:100vh;font-family:"Public Sans",system-ui,sans-serif;color:var(--text);font-size:16px;line-height:1.45;background:var(--paper)}
+  .topo{background:linear-gradient(135deg,#0f3d3e 0%,#1f6b6a 60%,#2d8f7c 100%);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 16px 16px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand svg{width:40px;height:40px;flex:none}
+  .brand .t1{font-family:"Fraunces",serif;font-weight:600;font-size:19px;line-height:1.1}
+  .brand .t2{font-size:12px;opacity:.85;letter-spacing:.5px;text-transform:uppercase}
+  .brand .sair{margin-left:auto;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
+  .wrap{max-width:720px;margin:0 auto;padding:14px 14px 40px}
+  .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 10px 30px -18px rgba(8,40,40,.45);margin-bottom:12px}
+  label{display:block;font-weight:700;font-size:14px;margin:0 0 6px;color:var(--ink)}
+  input[type=text],input[type=email],input[type=password],input[type=date],input[type=search]{width:100%;font-family:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fbfcfb;color:var(--text)}
+  input:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 4px rgba(23,89,90,.15)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;text-decoration:none;font-family:inherit;font-size:15px;font-weight:700;padding:12px 14px;border-radius:12px;transition:filter .15s,transform .08s}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.55}
+  .btn.primary{background:var(--ink);color:#fff;width:100%;font-size:17px;padding:15px}
+  .btn.zap{background:var(--zap);color:#fff}
+  .btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
+  .btn.sm{padding:9px 12px;font-size:14px}
+  .msg{padding:10px 12px;border-radius:12px;font-size:14px;margin-top:12px}
+  .msg.erro{background:var(--warn-bg);color:var(--warn);border:1px solid #f0c9b3}
+  .msg.info{background:var(--info-bg);color:var(--ok);border:1px solid #bfe3cf}
+  .oculto{display:none !important}
+  .filtros{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .lista{display:flex;flex-direction:column;gap:10px}
+  .item{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 8px 24px -18px rgba(8,40,40,.4);border-left:5px solid var(--mint)}
+  .item.sem{border-left-color:#e3b58a}
+  .item .nome{font-family:"Fraunces",serif;font-size:19px;font-weight:600;color:var(--ink);line-height:1.15}
+  .item .meta{font-size:13px;color:var(--muted);margin:3px 0 10px}
+  .selo{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.3px;padding:3px 8px;border-radius:999px;margin-right:4px}
+  .selo.ok{background:var(--mint-2);color:var(--ok)} .selo.pend{background:var(--warn-bg);color:var(--warn)}
+  .acoes{display:flex;flex-wrap:wrap;gap:8px}
+  .qrbox{display:none;margin-top:12px;text-align:center}
+  .qrbox.aberto{display:block}
+  .qrbox canvas,.qrbox img{width:220px;height:220px;background:#fff;padding:10px;border-radius:12px;border:1px solid var(--line)}
+  .qrbox .lnk{font-size:12px;color:var(--muted);word-break:break-all;margin-top:6px}
+  .vazio{text-align:center;color:var(--muted);padding:30px 10px}
+  .rodape{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
+  @media (min-width:600px){.filtros{grid-template-columns:2fr 1fr auto;align-items:end}}
+</style>
+</head>
+<body>
+<div class="topo">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fe0c3"/><stop offset="1" stop-color="#2d8f7c"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#g)"/><path d="M19 40c0-9 6-15 13-15s11 5 11 11-4 9-8 9-6-3-6-6 2-5 5-5" fill="none" stroke="#0f3d3e" stroke-width="3.2" stroke-linecap="round"/><circle cx="34" cy="34" r="2.2" fill="#0f3d3e"/><path d="M19 40v4" stroke="#0f3d3e" stroke-width="3.2" stroke-linecap="round"/></svg>
+    <div><div class="t1">EndoLaudo · Painel</div><div class="t2" id="quem">Laudos e QR dos pacientes</div></div>
+    <button class="sair oculto" id="sair" type="button">Sair</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="card" id="login">
+    <form id="formLogin">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="senha" style="margin-top:12px">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button class="btn primary" type="submit" id="btnLogin" style="margin-top:16px">Entrar</button>
+      <div id="msgLogin" class="msg oculto"></div>
+    </form>
+    <p class="rodape">Acesso restrito à equipe. Para pacientes, use o QR impresso no termo.</p>
+  </div>
+
+  <div id="app" class="oculto">
+    <div class="card">
+      <div class="filtros">
+        <div><label for="busca">Paciente</label><input id="busca" type="search" placeholder="Nome (qualquer parte)"></div>
+        <div><label for="dia">Data do exame</label><input id="dia" type="date"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end"><button class="btn ghost sm" type="button" id="hoje">Hoje</button><button class="btn ghost sm" type="button" id="todos" title="Últimos 60 dias">Recentes</button></div>
+      </div>
+    </div>
+    <div class="lista" id="lista"></div>
+    <div class="rodape">
+      <a href="#" id="trocarSenha" style="color:var(--ink)">Trocar minha senha</a> · O link do paciente só abre com a data de nascimento dele.
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SUPABASE_URL = 'https://plehqstkkrfjixnhgpkl.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_LYcB9tgtpPdVNYnbUZw8Bg_Xa8tak-f';
+  var PAGINA = 'https://mfpassoss.github.io/ENDOSCOPIA/laudo.html';
+  var $ = function (id) { return document.getElementById(id); };
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function br(iso) { return iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : ''; }
+  function hojeIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function mostrarLogin(msg) {
+    $('login').classList.remove('oculto'); $('app').classList.add('oculto'); $('sair').classList.add('oculto');
+    if (msg) { $('msgLogin').textContent = msg; $('msgLogin').className = 'msg erro'; }
+  }
+  function mostrarApp(user) {
+    $('login').classList.add('oculto'); $('app').classList.remove('oculto'); $('sair').classList.remove('oculto');
+    var nome = (user.user_metadata && user.user_metadata.nome) || user.email;
+    $('quem').textContent = nome;
+    if (!$('dia').value) $('dia').value = hojeIso();
+    carregar();
+  }
+
+  sb.auth.getSession().then(function (r) {
+    if (r.data && r.data.session) mostrarApp(r.data.session.user); else mostrarLogin();
+  });
+
+  $('formLogin').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('btnLogin').disabled = true; $('msgLogin').classList.add('oculto');
+    sb.auth.signInWithPassword({ email: $('email').value.trim(), password: $('senha').value }).then(function (r) {
+      $('btnLogin').disabled = false;
+      if (r.error) return mostrarLogin('E-mail ou senha incorretos.');
+      $('senha').value = '';
+      mostrarApp(r.data.user);
+    });
+  });
+  $('sair').addEventListener('click', function () { sb.auth.signOut().then(function () { mostrarLogin(); }); });
+  $('trocarSenha').addEventListener('click', function (e) {
+    e.preventDefault();
+    var nova = prompt('Nova senha (mínimo 8 caracteres):');
+    if (!nova) return;
+    if (nova.length < 8) return alert('A senha precisa ter pelo menos 8 caracteres.');
+    sb.auth.updateUser({ password: nova }).then(function (r) { alert(r.error ? 'Não deu: ' + r.error.message : 'Senha trocada.'); });
+  });
+
+  var modo = 'dia';
+  $('hoje').addEventListener('click', function () { modo = 'dia'; $('dia').value = hojeIso(); carregar(); });
+  $('todos').addEventListener('click', function () { modo = 'recentes'; $('dia').value = ''; carregar(); });
+  $('dia').addEventListener('change', function () { modo = $('dia').value ? 'dia' : 'recentes'; carregar(); });
+  var t; $('busca').addEventListener('input', function () { clearTimeout(t); t = setTimeout(carregar, 250); });
+
+  function carregar() {
+    var q = sb.from('laudos').select('token,paciente,exame,exame_data,hospital,medico,tem_pdf,tem_anatomo,biopsia,revogado,expira_em,acessos')
+      .eq('revogado', false).order('exame_data', { ascending: false }).order('criado_em', { ascending: false }).limit(200);
+    var busca = $('busca').value.trim();
+    if (busca) q = q.ilike('paciente', '%' + busca + '%');
+    if (modo === 'dia' && $('dia').value) q = q.eq('exame_data', $('dia').value);
+    else { var d = new Date(); d.setDate(d.getDate() - 60); q = q.gte('exame_data', d.toISOString().slice(0, 10)); }
+    $('lista').innerHTML = '<div class="vazio">Carregando…</div>';
+    q.then(function (r) {
+      if (r.error) { $('lista').innerHTML = '<div class="vazio">Erro ao carregar: ' + esc(r.error.message) + '</div>'; return; }
+      render(r.data || []);
+    });
+  }
+
+  function render(itens) {
+    if (!itens.length) { $('lista').innerHTML = '<div class="vazio">Nenhum exame ' + (modo === 'dia' ? 'nesta data' : 'nos últimos 60 dias') + '.</div>'; return; }
+    $('lista').innerHTML = itens.map(function (x, i) {
+      var link = PAGINA + '?t=' + x.token;
+      var selos = (x.tem_pdf ? '<span class="selo ok">laudo no portal</span>' : '<span class="selo pend">laudo ainda não liberado</span>')
+        + (x.biopsia ? (x.tem_anatomo ? '<span class="selo ok">biópsia disponível</span>' : '<span class="selo pend">biópsia pendente</span>') : '')
+        + (x.acessos ? '<span class="selo ok">' + x.acessos + ' acesso(s)</span>' : '');
+      var texto = 'Olá! Aqui está o acesso ao laudo do exame (' + x.exame + (x.exame_data ? ', ' + br(x.exame_data) : '') + ').\n'
+        + 'Abra o link e confirme sua data de nascimento:\n' + link
+        + (x.tem_pdf ? '' : '\n\n(O laudo é liberado pelo médico em breve; o mesmo link funciona depois.)');
+      return '<div class="item' + (x.tem_pdf ? '' : ' sem') + '">'
+        + '<div class="nome">' + esc(x.paciente) + '</div>'
+        + '<div class="meta">' + esc(x.exame) + (x.exame_data ? ' · ' + br(x.exame_data) : '') + (x.hospital ? ' · ' + esc(x.hospital) : '') + '</div>'
+        + '<div style="margin-bottom:10px">' + selos + '</div>'
+        + '<div class="acoes">'
+        + '<a class="btn zap sm" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(texto) + '">WhatsApp</a>'
+        + '<button class="btn ghost sm" type="button" data-qr="' + i + '">QR code</button>'
+        + '<button class="btn ghost sm" type="button" data-copiar="' + esc(link) + '">Copiar link</button>'
+        + '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + esc(link) + '">Abrir</a>'
+        + '</div>'
+        + '<div class="qrbox" id="qr' + i + '"><canvas></canvas><div class="lnk">' + esc(link) + '</div></div>'
+        + '</div>';
+    }).join('');
+    $('lista').querySelectorAll('[data-qr]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = b.getAttribute('data-qr'); var box = $('qr' + i);
+        box.classList.toggle('aberto');
+        if (box.classList.contains('aberto') && !box.dataset.feito) {
+          window.QRCode.toCanvas(box.querySelector('canvas'), PAGINA + '?t=' + itens[i].token, { margin: 1, width: 440, errorCorrectionLevel: 'M' }, function () {});
+          box.dataset.feito = '1';
+        }
+      });
+    });
+    $('lista').querySelectorAll('[data-copiar]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-copiar');
+        (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () { b.textContent = 'Copiado!'; setTimeout(function () { b.textContent = 'Copiar link'; }, 1500); }, function () { prompt('Copie o link:', v); });
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
