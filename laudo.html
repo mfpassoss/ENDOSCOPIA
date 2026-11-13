@@ -171,7 +171,9 @@
         </div>
       </div>
       <div id="biopsiaPendente" class="msg info oculto" style="margin-top:18px">
-        <b>Biópsia:</b> o resultado do laboratório ainda não chegou. Volte a este mesmo código em alguns dias; ele aparece aqui, logo abaixo do laudo.
+        <b>Biópsia:</b> o resultado ainda não chegou. Quando o laboratório liberar, ele aparece aqui, neste mesmo código, logo abaixo do laudo.
+        <div id="labTexto" style="margin-top:8px"></div>
+        <a id="labLink" class="btn ghost oculto" href="#" target="_blank" rel="noopener" style="margin-top:10px">Consultar no site do laboratório</a>
       </div>
     </div>
 
@@ -266,6 +268,9 @@
             $('zapAnatomo').onclick = function () { compartilhar($('zapAnatomo'), d.urlAnatomo, nomeA); };
             $('anatomo').classList.remove('oculto');
           } else if (d.biopsia) {
+            var lab = d.lab || {};
+            if (lab.nome) $('labTexto').textContent = 'A análise é feita pelo ' + lab.nome + (lab.info ? ' — ' + lab.info : '') + '.';
+            if (lab.url) { $('labLink').href = lab.url; $('labLink').textContent = 'Consultar no site do ' + (lab.nome || 'laboratório'); $('labLink').classList.remove('oculto'); }
             $('biopsiaPendente').classList.remove('oculto');
           }
           $('pronto').classList.remove('oculto');

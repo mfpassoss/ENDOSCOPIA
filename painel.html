@@ -46,6 +46,7 @@
   .item{background:var(--card);border-radius:16px;padding:14px;box-shadow:0 8px 24px -18px rgba(8,40,40,.4);border-left:5px solid var(--mint)}
   .item.sem{border-left-color:#e3b58a}
   .item .nome{font-family:"Fraunces",serif;font-size:19px;font-weight:600;color:var(--ink);line-height:1.15}
+  .nasc{display:inline-block;margin-left:8px;font-size:13px;font-weight:600;color:var(--ink);background:#eef4f1;border-radius:8px;padding:2px 8px;vertical-align:middle}
   .item .meta{font-size:13px;color:var(--muted);margin:3px 0 10px}
   .selo{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.3px;padding:3px 8px;border-radius:999px;margin-right:4px}
   .selo.ok{background:var(--mint-2);color:var(--ok)} .selo.pend{background:var(--warn-bg);color:var(--warn)}
@@ -125,6 +126,8 @@
     $('login').classList.add('oculto'); $('app').classList.remove('oculto'); $('sair').classList.remove('oculto');
     var nome = (user.user_metadata && user.user_metadata.nome) || user.email;
     $('quem').textContent = nome;
+    // Só o médico (papel "medico" no cadastro do usuário) vê a data de nascimento na lista
+    verNasc = !!(user.app_metadata && user.app_metadata.papel === 'medico');
     if (!diaIso()) setDia(hojeIso());
     carregar();
   }
@@ -166,8 +169,9 @@
   });
   var t; $('busca').addEventListener('input', function () { clearTimeout(t); t = setTimeout(carregar, 250); });
 
+  var verNasc = false;
   function carregar() {
-    var q = sb.from('laudos').select('token,paciente,exame,exame_data,hospital,medico,tem_pdf,tem_anatomo,biopsia,revogado,expira_em,acessos')
+    var q = sb.from('laudos').select('token,paciente,exame,exame_data,hospital,medico,tem_pdf,tem_anatomo,biopsia,revogado,expira_em,acessos' + (verNasc ? ',nascimento' : ''))
       .eq('revogado', false).order('exame_data', { ascending: false }).order('criado_em', { ascending: false }).limit(200);
     var busca = $('busca').value.trim();
     if (busca) q = q.ilike('paciente', '%' + busca + '%');
@@ -191,7 +195,7 @@
         + 'Abra o link e confirme sua data de nascimento:\n' + link
         + (x.tem_pdf ? '' : '\n\n(O laudo é liberado pelo médico em breve; o mesmo link funciona depois.)');
       return '<div class="item' + (x.tem_pdf ? '' : ' sem') + '">'
-        + '<div class="nome">' + esc(x.paciente) + '</div>'
+        + '<div class="nome">' + esc(x.paciente) + (verNasc && x.nascimento ? ' <span class="nasc">nasc. ' + br(x.nascimento) + '</span>' : '') + '</div>'
         + '<div class="meta">' + esc(x.exame) + (x.exame_data ? ' · ' + br(x.exame_data) : '') + (x.hospital ? ' · ' + esc(x.hospital) : '') + '</div>'
         + '<div style="margin-bottom:10px">' + selos + '</div>'
         + '<div class="acoes">'
