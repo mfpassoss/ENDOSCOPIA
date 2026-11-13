@@ -196,7 +196,12 @@
 <script>
 (function () {
   var API = 'https://plehqstkkrfjixnhgpkl.supabase.co/functions/v1/laudo';
-  var t = new URLSearchParams(location.search).get('t') || '';
+  var params = new URLSearchParams(location.search);
+  var t = params.get('t') || '';
+  // Aberto pelo painel do médico: data de nascimento já vem no link (n=AAAA-MM-DD) e o laudo abre sozinho.
+  // O parâmetro sai da barra de endereço na hora, para não ir junto se a página for compartilhada.
+  var nascAuto = /^\d{4}-\d{2}-\d{2}$/.test(params.get('n') || '') ? params.get('n') : '';
+  if (params.has('n')) { try { history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(t)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
   function mostrar(texto, classe) { var el = $('msg'); el.textContent = texto; el.className = 'msg ' + (classe || 'info'); }
   function falha(texto) { $('form').classList.add('oculto'); $('pronto').classList.add('oculto'); mostrar(texto, 'info'); }
@@ -214,7 +219,8 @@
       if (!d.ok) { cabecalho('Laudo indisponível', ''); return falha(d.msg || 'Laudo indisponível.'); }
       cabecalho(d.exame, d.hospital);
       $('form').classList.remove('oculto');
-      $('nasc').focus();
+      if (nascAuto) { $('nasc').value = nascAuto.split('-').reverse().join('/'); $('form').requestSubmit ? $('form').requestSubmit() : $('btn').click(); }
+      else $('nasc').focus();
     })
     .catch(function () { cabecalho('Sem conexão', ''); falha('Sem conexão com o servidor. Verifique a internet e tente de novo.'); });
 

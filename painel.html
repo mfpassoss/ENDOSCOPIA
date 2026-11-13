@@ -207,7 +207,7 @@
         + '<a class="btn zap sm" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(texto) + '">WhatsApp</a>'
         + '<button class="btn ghost sm" type="button" data-qr="' + i + '">QR code</button>'
         + '<button class="btn ghost sm" type="button" data-copiar="' + esc(link) + '">Copiar link</button>'
-        + '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + esc(link) + '">Abrir</a>'
+        + '<a class="btn ghost sm" target="_blank" rel="noopener" href="' + esc(link + (verNasc && x.nascimento ? '&n=' + x.nascimento : '')) + '">' + (verNasc && x.nascimento ? 'Abrir laudo' : 'Abrir') + '</a>'
         + '</div>'
         + '<div class="qrbox" id="qr' + i + '"><canvas></canvas><div class="lnk">' + esc(link) + '</div></div>'
         + '</div>';
