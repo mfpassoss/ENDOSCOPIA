@@ -57,7 +57,8 @@
   .qrbox .lnk{font-size:12px;color:var(--muted);word-break:break-all;margin-top:6px}
   .vazio{text-align:center;color:var(--muted);padding:30px 10px}
   .rodape{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
-  @media (min-width:600px){.filtros{grid-template-columns:2fr 1fr auto;align-items:end}}
+  @media (min-width:600px){.filtros{grid-template-columns:2fr 1fr 1fr auto;align-items:end}}
+  select{width:100%;font-family:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fbfcfb;color:var(--text)}
 </style>
 </head>
 <body>
@@ -87,6 +88,7 @@
       <div class="filtros">
         <div><label for="busca">Paciente</label><input id="busca" type="search" placeholder="Nome (qualquer parte)"></div>
         <div><label for="dia">Data do exame</label><input id="dia" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10"></div>
+        <div id="hospBox" class="oculto"><label for="hosp">Hospital</label><select id="hosp"><option value="">Todos</option></select></div>
         <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="ant" title="Dia anterior">◀</button><button class="btn ghost sm" type="button" id="hoje">Hoje</button><button class="btn ghost sm" type="button" id="prox" title="Dia seguinte">▶</button><button class="btn ghost sm" type="button" id="todos" title="Últimos 60 dias">Recentes</button></div>
       </div>
     </div>
@@ -175,11 +177,30 @@
   var t; $('busca').addEventListener('input', function () { clearTimeout(t); t = setTimeout(carregar, 250); });
 
   var verNasc = false;
+  var hospitaisCarregados = false;
+  function carregarHospitais() {
+    if (hospitaisCarregados) return;
+    hospitaisCarregados = true;
+    sb.from('laudos').select('hospital').eq('revogado', false).limit(1000).then(function (r) {
+      var vistos = {}; var lista = [];
+      (r.data || []).forEach(function (x) { if (x.hospital && !vistos[x.hospital]) { vistos[x.hospital] = 1; lista.push(x.hospital); } });
+      if (lista.length < 2) return; // um hospital só: filtro não ajuda
+      lista.sort();
+      var sel = $('hosp');
+      lista.forEach(function (h) { var o = document.createElement('option'); o.value = h; o.textContent = h; sel.appendChild(o); });
+      try { var g = localStorage.getItem('painel.hosp'); if (g && vistos[g]) sel.value = g; } catch (e) {}
+      $('hospBox').classList.remove('oculto');
+      if (sel.value) carregar();
+    });
+  }
+  $('hosp').addEventListener('change', function () { try { localStorage.setItem('painel.hosp', this.value); } catch (e) {} carregar(); });
   function carregar() {
+    carregarHospitais();
     var q = sb.from('laudos').select('token,paciente,exame,exame_data,hospital,medico,tem_pdf,tem_anatomo,biopsia,revogado,expira_em,acessos' + (verNasc ? ',nascimento' : ''))
       .eq('revogado', false).order('exame_data', { ascending: false }).order('criado_em', { ascending: false }).limit(200);
     var busca = $('busca').value.trim();
     if (busca) q = q.ilike('paciente', '%' + busca + '%');
+    if ($('hosp').value) q = q.eq('hospital', $('hosp').value);
     if (modo === 'dia' && diaIso()) q = q.eq('exame_data', diaIso());
     else { var d = new Date(); d.setDate(d.getDate() - 60); q = q.gte('exame_data', d.toISOString().slice(0, 10)); }
     $('lista').innerHTML = '<div class="vazio">Carregando…</div>';
