@@ -92,6 +92,8 @@
   .acoes{display:flex;flex-direction:column;gap:12px;margin-top:6px}
   .msg{padding:12px 14px;border-radius:12px;font-size:15px;margin-top:14px;line-height:1.45}
   .msg.erro{background:var(--warn-bg);color:var(--warn);border:1px solid #f0c9b3}
+  .copiar{font:inherit;font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px;border:1.5px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+  .copiar.ok{background:var(--ink);color:#fff}
   .msg.info{background:var(--info-bg);color:var(--ok);border:1px solid #bfe3cf}
   .liberado{display:flex;align-items:center;gap:12px;margin:2px 0 16px}
   .liberado .check{width:44px;height:44px;border-radius:50%;background:var(--mint-2);display:grid;place-items:center;color:var(--ok);flex:none;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
@@ -192,8 +194,9 @@
         <div id="labTexto" style="margin-top:8px"></div>
         <div id="labAcesso" class="oculto" style="margin-top:10px;padding:10px 12px;background:#fff;border:1px solid #bfe3cf;border-radius:10px;color:var(--text)">
           <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Seus dados de acesso no site do laboratório</div>
-          <div>Usuário: <b id="labUsuario" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b></div>
-          <div>Senha: <b id="labSenha" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b></div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Usuário: <b id="labUsuario" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b> <button type="button" class="copiar" data-copiar="labUsuario">Copiar</button></div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">Senha: <b id="labSenha" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b> <button type="button" class="copiar" data-copiar="labSenha">Copiar</button></div>
+          <div style="font-size:13px;color:var(--muted);margin-top:8px">Toque em Copiar, abra o site do laboratório pelo botão abaixo e cole no campo "Usuário ou e-mail" e depois em "Senha".</div>
         </div>
         <a id="labLink" class="btn ghost oculto" href="#" target="_blank" rel="noopener" style="margin-top:10px">Consultar no site do laboratório</a>
       </div>
@@ -273,6 +276,16 @@
       return navigator.share({ files: [file], title: 'Laudo do exame' }).catch(function () {}).then(restaurar);
     }).catch(fallback);
   }
+
+  // Copiar usuário/senha do laboratório (o site deles não aceita preenchimento por link)
+  Array.prototype.forEach.call(document.querySelectorAll('.copiar'), function (b) {
+    b.addEventListener('click', function () {
+      var txt = $(b.getAttribute('data-copiar')).textContent;
+      var feito = function () { b.textContent = 'Copiado ✓'; b.classList.add('ok'); setTimeout(function () { b.textContent = 'Copiar'; b.classList.remove('ok'); }, 2500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(feito, function () { window.prompt('Copie:', txt); });
+      else window.prompt('Copie:', txt);
+    });
+  });
 
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
