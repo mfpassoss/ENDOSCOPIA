@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="qrcode.min.js"></script>
 <style>
   :root{--ink:#0f3d3e;--ink-2:#17595a;--mint:#8fd3b6;--mint-2:#cdeedd;--paper:#f7f4ee;--card:#fff;--text:#1d2a2a;--muted:#5f6f6e;--line:#d9e2df;--ok:#1f7a4d;--warn:#b4511a;--warn-bg:#fdf1ea;--info-bg:#eef7f2;--zap:#1faa5a}
   *{box-sizing:border-box}
@@ -190,7 +190,14 @@
         var i = b.getAttribute('data-qr'); var box = $('qr' + i);
         box.classList.toggle('aberto');
         if (box.classList.contains('aberto') && !box.dataset.feito) {
-          window.QRCode.toCanvas(box.querySelector('canvas'), PAGINA + '?t=' + itens[i].token, { margin: 1, width: 440, errorCorrectionLevel: 'M' }, function () {});
+          var canvas = box.querySelector('canvas');
+          try {
+            window.QRCode.toCanvas(canvas, PAGINA + '?t=' + itens[i].token, { margin: 1, width: 440, errorCorrectionLevel: 'M' }, function (err) {
+              if (err) box.querySelector('.lnk').textContent = 'Não deu para desenhar o QR: ' + err;
+            });
+          } catch (err) {
+            box.querySelector('.lnk').textContent = 'Não deu para desenhar o QR (' + err + '). Use "Copiar link".';
+          }
           box.dataset.feito = '1';
         }
       });
