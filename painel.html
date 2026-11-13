@@ -85,8 +85,8 @@
     <div class="card">
       <div class="filtros">
         <div><label for="busca">Paciente</label><input id="busca" type="search" placeholder="Nome (qualquer parte)"></div>
-        <div><label for="dia">Data do exame</label><input id="dia" type="date"></div>
-        <div style="display:flex;gap:8px;align-items:flex-end"><button class="btn ghost sm" type="button" id="hoje">Hoje</button><button class="btn ghost sm" type="button" id="todos" title="Últimos 60 dias">Recentes</button></div>
+        <div><label for="dia">Data do exame</label><input id="dia" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="ant" title="Dia anterior">◀</button><button class="btn ghost sm" type="button" id="hoje">Hoje</button><button class="btn ghost sm" type="button" id="prox" title="Dia seguinte">▶</button><button class="btn ghost sm" type="button" id="todos" title="Últimos 60 dias">Recentes</button></div>
       </div>
     </div>
     <div class="lista" id="lista"></div>
@@ -106,7 +106,17 @@
 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function br(iso) { return iso ? String(iso).slice(0, 10).split('-').reverse().join('/') : ''; }
-  function hojeIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function isoDe(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function hojeIso() { return isoDe(new Date()); }
+  // Campo de data em dd/mm/aaaa (o calendário nativo segue o idioma do celular e aparece em formato americano)
+  function diaIso() {
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec($('dia').value.trim());
+    return m ? m[3] + '-' + m[2] + '-' + m[1] : '';
+  }
+  function setDia(iso) { $('dia').value = iso ? iso.split('-').reverse().join('/') : ''; }
+  function somaDias(n) {
+    var base = diaIso() || hojeIso(); var p = base.split('-'); var d = new Date(+p[0], +p[1] - 1, +p[2]); d.setDate(d.getDate() + n); return isoDe(d);
+  }
   function mostrarLogin(msg) {
     $('login').classList.remove('oculto'); $('app').classList.add('oculto'); $('sair').classList.add('oculto');
     if (msg) { $('msgLogin').textContent = msg; $('msgLogin').className = 'msg erro'; }
@@ -115,7 +125,7 @@
     $('login').classList.add('oculto'); $('app').classList.remove('oculto'); $('sair').classList.remove('oculto');
     var nome = (user.user_metadata && user.user_metadata.nome) || user.email;
     $('quem').textContent = nome;
-    if (!$('dia').value) $('dia').value = hojeIso();
+    if (!diaIso()) setDia(hojeIso());
     carregar();
   }
 
@@ -143,9 +153,17 @@
   });
 
   var modo = 'dia';
-  $('hoje').addEventListener('click', function () { modo = 'dia'; $('dia').value = hojeIso(); carregar(); });
-  $('todos').addEventListener('click', function () { modo = 'recentes'; $('dia').value = ''; carregar(); });
-  $('dia').addEventListener('change', function () { modo = $('dia').value ? 'dia' : 'recentes'; carregar(); });
+  $('hoje').addEventListener('click', function () { modo = 'dia'; setDia(hojeIso()); carregar(); });
+  $('ant').addEventListener('click', function () { modo = 'dia'; setDia(somaDias(-1)); carregar(); });
+  $('prox').addEventListener('click', function () { modo = 'dia'; setDia(somaDias(1)); carregar(); });
+  $('todos').addEventListener('click', function () { modo = 'recentes'; setDia(''); carregar(); });
+  $('dia').addEventListener('input', function () {
+    var d = this.value.replace(/\D/g, '').slice(0, 8); var v = d;
+    if (d.length > 4) v = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4); else if (d.length > 2) v = d.slice(0, 2) + '/' + d.slice(2);
+    this.value = v;
+    if (d.length === 8 && diaIso()) { modo = 'dia'; carregar(); }
+    if (d.length === 0) { modo = 'recentes'; carregar(); }
+  });
   var t; $('busca').addEventListener('input', function () { clearTimeout(t); t = setTimeout(carregar, 250); });
 
   function carregar() {
@@ -153,7 +171,7 @@
       .eq('revogado', false).order('exame_data', { ascending: false }).order('criado_em', { ascending: false }).limit(200);
     var busca = $('busca').value.trim();
     if (busca) q = q.ilike('paciente', '%' + busca + '%');
-    if (modo === 'dia' && $('dia').value) q = q.eq('exame_data', $('dia').value);
+    if (modo === 'dia' && diaIso()) q = q.eq('exame_data', diaIso());
     else { var d = new Date(); d.setDate(d.getDate() - 60); q = q.gte('exame_data', d.toISOString().slice(0, 10)); }
     $('lista').innerHTML = '<div class="vazio">Carregando…</div>';
     q.then(function (r) {
