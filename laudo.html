@@ -193,15 +193,9 @@
         </div>
       </div>
       <div id="biopsiaPendente" class="msg info oculto" style="margin-top:18px">
-        <b>Biópsia:</b> o resultado ainda não chegou. Quando o laboratório liberar, ele aparece aqui, neste mesmo código, logo abaixo do laudo.
+        <b>Biópsia:</b> o resultado do anatomopatológico é entregue diretamente pelo laboratório, não por este link.
         <div id="labTexto" style="margin-top:8px"></div>
-        <div id="labAcesso" class="oculto" style="margin-top:10px;padding:10px 12px;background:#fff;border:1px solid #bfe3cf;border-radius:10px;color:var(--text)">
-          <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Seus dados de acesso no site do laboratório</div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Usuário: <b id="labUsuario" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b> <button type="button" class="copiar" data-copiar="labUsuario">Copiar</button></div>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">Senha: <b id="labSenha" style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:17px;letter-spacing:.5px"></b> <button type="button" class="copiar" data-copiar="labSenha">Copiar</button></div>
-          <div style="font-size:13px;color:var(--muted);margin-top:8px">Toque em Copiar, abra o site do laboratório pelo botão abaixo e cole no campo "Usuário ou e-mail" e depois em "Senha".</div>
-        </div>
-        <a id="labLink" class="btn ghost oculto" href="#" target="_blank" rel="noopener" style="margin-top:10px">Consultar no site do laboratório</a>
+        <a id="labLink" class="btn zap oculto" href="#" target="_blank" rel="noopener" style="margin-top:10px">Falar com o laboratório no WhatsApp</a>
       </div>
     </div>
 
@@ -283,16 +277,6 @@
     }).catch(fallback);
   }
 
-  // Copiar usuário/senha do laboratório (o site deles não aceita preenchimento por link)
-  Array.prototype.forEach.call(document.querySelectorAll('.copiar'), function (b) {
-    b.addEventListener('click', function () {
-      var txt = $(b.getAttribute('data-copiar')).textContent;
-      var feito = function () { b.textContent = 'Copiado ✓'; b.classList.add('ok'); setTimeout(function () { b.textContent = 'Copiar'; b.classList.remove('ok'); }, 2500); };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(feito, function () { window.prompt('Copie:', txt); });
-      else window.prompt('Copie:', txt);
-    });
-  });
-
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     var iso = isoDe($('nasc').value);
@@ -316,9 +300,8 @@
             $('anatomo').classList.remove('oculto');
           } else if (d.biopsia) {
             var lab = d.lab || {};
-            if (lab.nome) $('labTexto').textContent = 'A análise é feita pelo ' + lab.nome + (lab.info ? ' — ' + lab.info : '') + '.';
-            if (d.labAcesso && d.labAcesso.usuario) { $('labUsuario').textContent = d.labAcesso.usuario; $('labSenha').textContent = d.labAcesso.senha || '—'; $('labAcesso').classList.remove('oculto'); }
-            if (lab.url) { $('labLink').href = lab.url; $('labLink').textContent = 'Consultar no site do ' + (lab.nome || 'laboratório'); $('labLink').classList.remove('oculto'); }
+            if (lab.nome) $('labTexto').textContent = 'Fale com o ' + lab.nome + (lab.info ? ' — ' + lab.info : '') + '.';
+            if (lab.url) { $('labLink').href = lab.url; $('labLink').textContent = /wa\.me|whatsapp/.test(lab.url) ? 'Falar com o ' + (lab.nome || 'laboratório') + ' no WhatsApp' : 'Site do ' + (lab.nome || 'laboratório'); $('labLink').classList.remove('oculto'); }
             $('biopsiaPendente').classList.remove('oculto');
           }
           $('pronto').classList.remove('oculto');
