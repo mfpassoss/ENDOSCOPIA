@@ -49,6 +49,8 @@
   }
   .wrap{max-width:520px;margin:0 auto;padding:28px 18px 40px;position:relative}
   /* marca */
+  #voltarPainel{display:inline-flex;align-items:center;gap:6px;margin:0 0 14px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);color:#fff;text-decoration:none;font-weight:700;font-size:14px}
+  #voltarPainel.oculto{display:none}
   .brand{display:flex;align-items:center;gap:14px;color:#fff;animation:up .6s ease both}
   .brand svg{width:54px;height:54px;flex:none;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
   .brand .t1{font-family:"Fraunces",serif;font-weight:600;font-size:22px;letter-spacing:.2px;line-height:1.1}
@@ -113,6 +115,7 @@
 </head>
 <body>
 <div class="wrap">
+  <a id="voltarPainel" class="oculto" href="painel.html">← Voltar ao painel</a>
   <div class="brand">
     <svg viewBox="0 0 64 64" aria-hidden="true">
       <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fe0c3"/><stop offset="1" stop-color="#2d8f7c"/></linearGradient></defs>
@@ -221,8 +224,11 @@
   // Aberto pelo painel do médico: data de nascimento já vem no link (n=AAAA-MM-DD) e o laudo abre sozinho.
   // O parâmetro sai da barra de endereço na hora, para não ir junto se a página for compartilhada.
   var nascAuto = /^\d{4}-\d{2}-\d{2}$/.test(params.get('n') || '') ? params.get('n') : '';
-  if (params.has('n')) { try { history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(t)); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
+  if (params.has('n')) {
+    try { history.replaceState(null, '', location.pathname + '?t=' + encodeURIComponent(t)); } catch (e) {}
+    $('voltarPainel').classList.remove('oculto'); // veio do painel do EndoLaudo: botão para voltar
+  }
   function mostrar(texto, classe) { var el = $('msg'); el.textContent = texto; el.className = 'msg ' + (classe || 'info'); }
   function falha(texto) { $('form').classList.add('oculto'); $('pronto').classList.add('oculto'); mostrar(texto, 'info'); }
   function cabecalho(exame, hospital) { $('exame').textContent = exame || '—'; $('hospital').textContent = hospital || ''; }
