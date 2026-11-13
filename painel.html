@@ -126,8 +126,13 @@
     $('login').classList.add('oculto'); $('app').classList.remove('oculto'); $('sair').classList.remove('oculto');
     var nome = (user.user_metadata && user.user_metadata.nome) || user.email;
     $('quem').textContent = nome;
-    // Só o médico (papel "medico" no cadastro do usuário) vê a data de nascimento na lista
+    // Só o médico (papel "medico" no cadastro do usuário) vê a data de nascimento na lista.
+    // Confere no servidor, para valer sem precisar sair e entrar de novo.
     verNasc = !!(user.app_metadata && user.app_metadata.papel === 'medico');
+    sb.auth.getUser().then(function (r) {
+      var u = r && r.data && r.data.user; var v = !!(u && u.app_metadata && u.app_metadata.papel === 'medico');
+      if (v !== verNasc) { verNasc = v; carregar(); }
+    });
     if (!diaIso()) setDia(hojeIso());
     carregar();
   }
