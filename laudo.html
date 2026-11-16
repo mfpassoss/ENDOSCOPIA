@@ -178,6 +178,21 @@
         </a>
       </div>
 
+      <div id="laudoB" class="oculto" style="margin-top:22px;padding-top:16px;border-top:1px dashed var(--line)">
+        <div class="liberado">
+          <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div><b id="tituloB">Segundo laudo</b><span>Mesma sessão, outro laudo: escolha o que fazer com o PDF.</span></div>
+        </div>
+        <div class="acoes">
+          <a id="salvarB" class="btn primary" style="margin-top:0" href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            Salvar no celular / computador (PDF)
+          </a>
+          <button type="button" id="zapB" class="btn zap">Enviar pelo WhatsApp</button>
+          <a id="abrirB" class="btn ghost" href="#" target="_blank" rel="noopener">Abrir o laudo na tela</a>
+        </div>
+      </div>
+
       <div id="anatomo" class="oculto" style="margin-top:22px;padding-top:16px;border-top:1px dashed var(--line)">
         <div class="liberado">
           <div class="check"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 3h3v15H5V6h3z"/><path d="M9 13l2 2 4-4"/></svg></div>
@@ -288,10 +303,21 @@
         $('btn').disabled = false;
         if (d.ok && d.url) {
           $('form').classList.add('oculto');
-          var nome = d.arquivo || 'Laudo.pdf';
-          $('salvar').href = d.url + (d.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nome);
-          $('abrir').href = d.url;
-          $('zap').onclick = function () { compartilhar($('zap'), d.url, nome); };
+          var lista = (d.laudos && d.laudos.length) ? d.laudos : [{ exame: '', url: d.url, arquivo: d.arquivo }];
+          var a = lista[0]; var nome = a.arquivo || 'Laudo.pdf';
+          $('salvar').href = a.url + (a.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nome);
+          $('abrir').href = a.url;
+          $('zap').onclick = function () { compartilhar($('zap'), a.url, nome); };
+          if (lista.length > 1) {
+            // Dois exames na mesma sessão (ex.: endoscopia + colonoscopia): cada laudo com seus botões
+            var b = lista[1]; var nomeB = b.arquivo || 'Laudo 2.pdf';
+            var t1 = document.querySelector('#pronto .liberado b'); if (t1 && a.exame) t1.textContent = 'Laudo liberado: ' + a.exame;
+            $('tituloB').textContent = 'Laudo liberado: ' + (b.exame || 'segundo exame');
+            $('salvarB').href = b.url + (b.url.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nomeB);
+            $('abrirB').href = b.url;
+            $('zapB').onclick = function () { compartilhar($('zapB'), b.url, nomeB); };
+            $('laudoB').classList.remove('oculto');
+          }
           if (d.urlAnatomo) {
             var nomeA = d.arquivoAnatomo || 'Biopsia.pdf';
             $('salvarAnatomo').href = d.urlAnatomo + (d.urlAnatomo.indexOf('?') >= 0 ? '&' : '?') + 'download=' + encodeURIComponent(nomeA);

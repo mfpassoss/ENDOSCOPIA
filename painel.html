@@ -196,7 +196,7 @@
   $('hosp').addEventListener('change', function () { try { localStorage.setItem('painel.hosp', this.value); } catch (e) {} carregar(); });
   function carregar() {
     carregarHospitais();
-    var q = sb.from('laudos').select('token,paciente,exame,exame_data,hospital,medico,tem_pdf,tem_anatomo,biopsia,revogado,expira_em,acessos' + (verNasc ? ',nascimento' : ''))
+    var q = sb.from('laudos').select('token,paciente,exame,exame2,exame_data,hospital,medico,tem_pdf,tem_pdf2,tem_anatomo,biopsia,revogado,expira_em,acessos' + (verNasc ? ',nascimento' : ''))
       .eq('revogado', false).order('exame_data', { ascending: false }).order('criado_em', { ascending: false }).limit(200);
     var busca = $('busca').value.trim();
     if (busca) q = q.ilike('paciente', '%' + busca + '%');
@@ -214,15 +214,15 @@
     if (!itens.length) { $('lista').innerHTML = '<div class="vazio">Nenhum exame ' + (modo === 'dia' ? 'nesta data' : 'nos últimos 60 dias') + '.</div>'; return; }
     $('lista').innerHTML = itens.map(function (x, i) {
       var link = PAGINA + '?t=' + x.token;
-      var selos = (x.tem_pdf ? '<span class="selo ok">laudo no portal</span>' : '<span class="selo pend">laudo ainda não liberado</span>')
+      var selos = ((x.tem_pdf || x.tem_pdf2) ? '<span class="selo ok">' + ((x.tem_pdf && x.tem_pdf2) ? '2 laudos no portal' : 'laudo no portal') + '</span>' : '<span class="selo pend">laudo ainda não liberado</span>')
         + (x.biopsia ? (x.tem_anatomo ? '<span class="selo ok">biópsia disponível</span>' : '<span class="selo pend">biópsia pendente</span>') : '')
         + (x.acessos ? '<span class="selo ok">' + x.acessos + ' acesso(s)</span>' : '');
-      var texto = 'Olá! Aqui está o acesso ao laudo do exame (' + x.exame + (x.exame_data ? ', ' + br(x.exame_data) : '') + ').\n'
+      var texto = 'Olá! Aqui está o acesso ao laudo do exame (' + x.exame + (x.exame2 && x.exame2 !== x.exame ? ' + ' + x.exame2 : '') + (x.exame_data ? ', ' + br(x.exame_data) : '') + ').\n'
         + 'Abra o link e confirme sua data de nascimento:\n' + link
-        + (x.tem_pdf ? '' : '\n\n(O laudo é liberado pelo médico em breve; o mesmo link funciona depois.)');
-      return '<div class="item' + (x.tem_pdf ? '' : ' sem') + '">'
+        + ((x.tem_pdf || x.tem_pdf2) ? '' : '\n\n(O laudo é liberado pelo médico em breve; o mesmo link funciona depois.)');
+      return '<div class="item' + ((x.tem_pdf || x.tem_pdf2) ? '' : ' sem') + '">'
         + '<div class="nome">' + esc(x.paciente) + (verNasc && x.nascimento ? ' <span class="nasc">nasc. ' + br(x.nascimento) + '</span>' : '') + '</div>'
-        + '<div class="meta">' + esc(x.exame) + (x.exame_data ? ' · ' + br(x.exame_data) : '') + (x.hospital ? ' · ' + esc(x.hospital) : '') + '</div>'
+        + '<div class="meta">' + esc(x.exame + (x.exame2 && x.exame2 !== x.exame ? ' + ' + x.exame2 : '')) + (x.exame_data ? ' · ' + br(x.exame_data) : '') + (x.hospital ? ' · ' + esc(x.hospital) : '') + '</div>'
         + '<div style="margin-bottom:10px">' + selos + '</div>'
         + '<div class="acoes">'
         + '<a class="btn zap sm" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(texto) + '">WhatsApp</a>'
