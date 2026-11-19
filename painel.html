@@ -65,7 +65,16 @@
   .vazio{text-align:center;color:var(--muted);padding:30px 10px}
   .rodape{font-size:12px;color:var(--muted);text-align:center;margin-top:18px}
   @media (min-width:600px){.filtros{grid-template-columns:2fr 1fr 1fr auto;align-items:end}}
-  select{width:100%;font-family:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fbfcfb;color:var(--text)}
+  select,textarea{width:100%;font-family:inherit;font-size:17px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fbfcfb;color:var(--text)}
+  textarea{min-height:64px;resize:vertical}
+  .abas{display:flex;gap:6px;margin:0 0 12px;background:#e6eeeb;border-radius:14px;padding:4px}
+  .abas button{flex:1;border:0;background:transparent;font-family:inherit;font-weight:700;font-size:15px;padding:10px;border-radius:11px;color:var(--ink-2)}
+  .abas button.ativa{background:#fff;color:var(--ink);box-shadow:0 4px 14px -8px rgba(8,40,40,.5)}
+  .form2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .form2 .full{grid-column:1 / -1}
+  .req{color:var(--warn)}
+  .item.imp{border-left-color:#b9c7c2;opacity:.75}
+  .fab{position:sticky;bottom:12px;margin-top:14px}
 </style>
 </head>
 <body>
@@ -91,6 +100,47 @@
   </div>
 
   <div id="app" class="oculto">
+    <div class="abas"><button type="button" id="abaLaudos" class="ativa">Laudos</button><button type="button" id="abaAgenda">Agenda</button></div>
+
+    <div id="secAgenda" class="oculto">
+      <div class="card">
+        <div class="filtros">
+          <div><label for="diaAg">Data do exame</label><input id="diaAg" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10"></div>
+          <div id="hospAgBox" class="oculto"><label for="hospAg">Hospital</label><select id="hospAg"></select></div>
+          <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap"><button class="btn ghost sm" type="button" id="antAg">◀</button><button class="btn ghost sm" type="button" id="hojeAg">Hoje</button><button class="btn ghost sm" type="button" id="proxAg">▶</button></div>
+        </div>
+        <button class="btn primary" type="button" id="novoAg" style="margin-top:12px">+ Cadastrar paciente</button>
+      </div>
+      <div class="card oculto" id="formAgCard">
+        <form id="formAg" autocomplete="off">
+          <input type="hidden" id="agId">
+          <div class="form2">
+            <div class="full"><label for="agNome">Nome completo <span class="req">*</span></label><input id="agNome" type="text" required autocapitalize="words"></div>
+            <div><label for="agNasc">Nascimento <span class="req">*</span></label><input id="agNasc" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+            <div><label for="agSexo">Sexo</label><select id="agSexo"><option value="">—</option><option value="F">Feminino</option><option value="M">Masculino</option></select></div>
+            <div><label for="agExame">Exame <span class="req">*</span></label><select id="agExame"><option value="EDA">Endoscopia (EDA)</option><option value="COLONO">Colonoscopia</option><option value="AMBOS">EDA + Colonoscopia</option><option value="RSC">Retossigmoidoscopia</option><option value="PEG">Gastrostomia (PEG)</option><option value="TROCA-PEG">Troca de PEG</option><option value="CPRE">CPRE</option></select></div>
+            <div><label for="agData">Data do exame <span class="req">*</span></label><input id="agData" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+            <div id="agHospBox" class="full oculto"><label for="agHosp">Hospital <span class="req">*</span></label><select id="agHosp"></select></div>
+            <div><label for="agConv">Convênio</label><input id="agConv" type="text"></div>
+            <div><label for="agPront">Prontuário / atendimento</label><input id="agPront" type="text" inputmode="numeric"></div>
+            <div><label for="agTel">Telefone</label><input id="agTel" type="text" inputmode="tel"></div>
+            <div><label for="agSolic">Médico solicitante</label><input id="agSolic" type="text" autocapitalize="words"></div>
+            <div class="full"><label for="agInd" id="agIndLabel">Indicação</label><input id="agInd" type="text"></div>
+            <div class="full oculto" id="agIndColBox"><label for="agIndCol">Indicação da colonoscopia</label><input id="agIndCol" type="text" placeholder="Vazia = a mesma da EDA"></div>
+            <div class="full"><label for="agObs">Observação</label><textarea id="agObs" placeholder="Ex.: cadeirante, alergia, acompanhante…"></textarea></div>
+          </div>
+          <div class="acoes" style="margin-top:12px">
+            <button class="btn primary" type="submit" id="agSalvar" style="width:auto;flex:1">Salvar</button>
+            <button class="btn ghost" type="button" id="agCancelar">Cancelar</button>
+          </div>
+          <div id="msgAg" class="msg oculto"></div>
+        </form>
+      </div>
+      <div class="lista" id="listaAg"></div>
+      <div class="rodape">O médico vê esta lista no EndoLaudo e inicia o exame com um clique. A data de nascimento é obrigatória: é a chave do paciente para abrir o laudo.</div>
+    </div>
+
+    <div id="secLaudos">
     <div class="card">
       <div class="filtros">
         <div><label for="busca">Paciente</label><input id="busca" type="search" placeholder="Nome (qualquer parte)"></div>
@@ -102,6 +152,7 @@
     <div class="lista" id="lista"></div>
     <div class="rodape">
       <a href="#" id="trocarSenha" style="color:var(--ink)">Trocar minha senha</a> · O link do paciente só abre com a data de nascimento dele.
+    </div>
     </div>
   </div>
 </div>
@@ -144,6 +195,7 @@
     });
     if (!diaIso()) setDia(hojeIso());
     carregar();
+    prepararAgenda(user);
   }
 
   sb.auth.getSession().then(function (r) {
@@ -261,6 +313,163 @@
       b.addEventListener('click', function () {
         var v = b.getAttribute('data-copiar');
         (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () { b.textContent = 'Copiado!'; setTimeout(function () { b.textContent = 'Copiar link'; }, 1500); }, function () { prompt('Copie o link:', v); });
+      });
+    });
+  }
+
+  // ---------- Agenda (pré-cadastro para o EndoLaudo) ----------
+  var ROTULO = { EDA: 'Endoscopia (EDA)', COLONO: 'Colonoscopia', AMBOS: 'EDA + Colonoscopia', RSC: 'Retossigmoidoscopia', PEG: 'Gastrostomia (PEG)', 'TROCA-PEG': 'Troca de PEG', CPRE: 'CPRE' };
+  var meuHospital = '';
+  var meuEmail = '';
+  var hospitaisAg = [];
+  function mascaraData(el) {
+    el.addEventListener('input', function () {
+      var d = this.value.replace(/\D/g, '').slice(0, 8); var v = d;
+      if (d.length > 4) v = d.slice(0, 2) + '/' + d.slice(2, 4) + '/' + d.slice(4); else if (d.length > 2) v = d.slice(0, 2) + '/' + d.slice(2);
+      this.value = v;
+    });
+  }
+  function isoDeBr(v) {
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v || '').trim());
+    if (!m) return '';
+    var d = new Date(+m[3], +m[2] - 1, +m[1]);
+    if (d.getFullYear() !== +m[3] || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[1]) return '';
+    return m[3] + '-' + m[2] + '-' + m[1];
+  }
+  mascaraData($('diaAg')); mascaraData($('agNasc')); mascaraData($('agData'));
+  function diaAgIso() { return isoDeBr($('diaAg').value); }
+  function setDiaAg(iso) { $('diaAg').value = iso ? iso.split('-').reverse().join('/') : ''; }
+  function somaDiasAg(n) { var base = diaAgIso() || hojeIso(); var p = base.split('-'); var d = new Date(+p[0], +p[1] - 1, +p[2]); d.setDate(d.getDate() + n); return isoDe(d); }
+
+  function mostrarAba(qual) {
+    var ag = qual === 'agenda';
+    $('abaAgenda').classList.toggle('ativa', ag); $('abaLaudos').classList.toggle('ativa', !ag);
+    $('secAgenda').classList.toggle('oculto', !ag); $('secLaudos').classList.toggle('oculto', ag);
+    try { localStorage.setItem('painel.aba', qual); } catch (e) {}
+    if (ag) { if (!diaAgIso()) setDiaAg(hojeIso()); carregarAgenda(); }
+  }
+  $('abaLaudos').addEventListener('click', function () { mostrarAba('laudos'); });
+  $('abaAgenda').addEventListener('click', function () { mostrarAba('agenda'); });
+  $('hojeAg').addEventListener('click', function () { setDiaAg(hojeIso()); carregarAgenda(); });
+  $('antAg').addEventListener('click', function () { setDiaAg(somaDiasAg(-1)); carregarAgenda(); });
+  $('proxAg').addEventListener('click', function () { setDiaAg(somaDiasAg(1)); carregarAgenda(); });
+  $('diaAg').addEventListener('input', function () { if (diaAgIso()) carregarAgenda(); });
+  $('hospAg').addEventListener('change', carregarAgenda);
+  $('agExame').addEventListener('change', function () {
+    var ambos = this.value === 'AMBOS';
+    $('agIndColBox').classList.toggle('oculto', !ambos);
+    $('agIndLabel').textContent = ambos ? 'Indicação da EDA' : 'Indicação';
+  });
+
+  function prepararAgenda(user) {
+    meuHospital = (user.app_metadata && user.app_metadata.hospital) || '';
+    meuEmail = user.email || '';
+    sb.from('hospitais').select('hospital').then(function (r) {
+      hospitaisAg = (r.data || []).map(function (x) { return x.hospital; });
+      if (meuHospital) hospitaisAg = [meuHospital];
+      ['hospAg', 'agHosp'].forEach(function (id) {
+        var sel = $(id); sel.innerHTML = '';
+        if (id === 'hospAg' && hospitaisAg.length > 1) { var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'Todos'; sel.appendChild(o0); }
+        hospitaisAg.forEach(function (h) { var o = document.createElement('option'); o.value = h; o.textContent = h; sel.appendChild(o); });
+      });
+      $('hospAgBox').classList.toggle('oculto', hospitaisAg.length < 2);
+      $('agHospBox').classList.toggle('oculto', hospitaisAg.length < 2);
+      try { var g = localStorage.getItem('painel.hospAg'); if (g && hospitaisAg.indexOf(g) >= 0) { $('hospAg').value = g; } } catch (e) {}
+      var aba = 'laudos'; try { aba = localStorage.getItem('painel.aba') || 'laudos'; } catch (e) {}
+      if (aba === 'agenda') mostrarAba('agenda');
+    });
+  }
+  $('hospAg').addEventListener('change', function () { try { localStorage.setItem('painel.hospAg', this.value); } catch (e) {} });
+
+  function abrirForm(item) {
+    $('formAgCard').classList.remove('oculto'); $('msgAg').classList.add('oculto');
+    $('agId').value = item ? item.id : '';
+    $('agNome').value = item ? item.paciente : '';
+    $('agNasc').value = item ? br(item.nascimento) : '';
+    $('agSexo').value = item ? item.sexo : '';
+    $('agExame').value = item ? item.exame : 'EDA';
+    $('agData').value = item ? br(item.exame_data) : (diaAgIso() ? br(diaAgIso()) : br(hojeIso()));
+    $('agHosp').value = item ? item.hospital : (($('hospAg').value) || hospitaisAg[0] || '');
+    $('agConv').value = item ? item.convenio : '';
+    $('agPront').value = item ? item.prontuario : '';
+    $('agTel').value = item ? item.telefone : '';
+    $('agSolic').value = item ? item.solicitante : '';
+    $('agInd').value = item ? item.indicacao : '';
+    $('agIndCol').value = item ? item.indicacao_colono : '';
+    $('agObs').value = item ? item.observacao : '';
+    $('agExame').dispatchEvent(new Event('change'));
+    $('agSalvar').textContent = item ? 'Salvar alterações' : 'Salvar';
+    $('formAgCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(function () { $('agNome').focus(); }, 200);
+  }
+  function fecharForm() { $('formAgCard').classList.add('oculto'); }
+  $('novoAg').addEventListener('click', function () { abrirForm(null); });
+  $('agCancelar').addEventListener('click', fecharForm);
+  function msgAg(texto, erro) { $('msgAg').textContent = texto; $('msgAg').className = 'msg ' + (erro ? 'erro' : 'info'); }
+
+  $('formAg').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nome = $('agNome').value.trim().replace(/\s+/g, ' ');
+    var nasc = isoDeBr($('agNasc').value);
+    var dataEx = isoDeBr($('agData').value);
+    var hosp = meuHospital || $('agHosp').value || hospitaisAg[0] || '';
+    if (nome.length < 5 || nome.indexOf(' ') < 0) return msgAg('Digite o nome completo do paciente.', true);
+    if (!nasc) return msgAg('Data de nascimento inválida. Use dd/mm/aaaa.', true);
+    if (nasc > hojeIso() || nasc < '1900-01-01') return msgAg('Data de nascimento fora do possível.', true);
+    if (!dataEx) return msgAg('Data do exame inválida. Use dd/mm/aaaa.', true);
+    if (!hosp) return msgAg('Escolha o hospital.', true);
+    var reg = {
+      hospital: hosp, paciente: nome, nascimento: nasc, sexo: $('agSexo').value, exame: $('agExame').value, exame_data: dataEx,
+      convenio: $('agConv').value.trim(), prontuario: $('agPront').value.trim(), telefone: $('agTel').value.trim(),
+      solicitante: $('agSolic').value.trim(), indicacao: $('agInd').value.trim(),
+      indicacao_colono: $('agExame').value === 'AMBOS' ? $('agIndCol').value.trim() : '',
+      observacao: $('agObs').value.trim(), atualizado_em: new Date().toISOString()
+    };
+    $('agSalvar').disabled = true;
+    var id = $('agId').value;
+    var q;
+    if (id) q = sb.from('agenda').update(reg).eq('id', id);
+    else { reg.criado_por = meuEmail; q = sb.from('agenda').insert(reg); }
+    q.then(function (r) {
+      $('agSalvar').disabled = false;
+      if (r.error) return msgAg('Não salvou: ' + r.error.message, true);
+      fecharForm();
+      if (dataEx !== diaAgIso()) setDiaAg(dataEx);
+      carregarAgenda();
+    });
+  });
+
+  function carregarAgenda() {
+    var dia = diaAgIso(); if (!dia) return;
+    var q = sb.from('agenda').select('*').eq('exame_data', dia).order('status').order('criado_em');
+    var h = meuHospital || $('hospAg').value;
+    if (h) q = q.eq('hospital', h);
+    $('listaAg').innerHTML = '<div class="vazio">Carregando…</div>';
+    q.then(function (r) {
+      if (r.error) { $('listaAg').innerHTML = '<div class="vazio">Erro ao carregar: ' + esc(r.error.message) + '</div>'; return; }
+      renderAgenda(r.data || []);
+    });
+  }
+  function renderAgenda(itens) {
+    if (!itens.length) { $('listaAg').innerHTML = '<div class="vazio">Nenhum paciente cadastrado para ' + esc(br(diaAgIso())) + '.</div>'; return; }
+    $('listaAg').innerHTML = itens.map(function (x, i) {
+      var imp = x.status === 'importado';
+      var meta = [ROTULO[x.exame] || x.exame, x.convenio, x.solicitante, hospitaisAg.length > 1 ? x.hospital : ''].filter(Boolean).join(' · ');
+      return '<div class="item' + (imp ? ' imp' : '') + '">'
+        + '<div class="nome">' + esc(x.paciente) + ' <span class="nasc">nasc. ' + br(x.nascimento) + '</span></div>'
+        + '<div class="meta">' + esc(meta) + (x.prontuario ? ' · pront. ' + esc(x.prontuario) : '') + '</div>'
+        + '<div style="margin-bottom:10px">' + (imp ? '<span class="selo ok">exame iniciado no EndoLaudo</span>' : '<span class="selo pend">aguardando o médico</span>') + '</div>'
+        + '<div class="acoes">'
+        + (imp ? '' : '<button class="btn ghost sm" type="button" data-editar="' + i + '">Editar</button>')
+        + '<button class="btn ghost sm" type="button" data-apagar="' + i + '" style="color:var(--warn)">Apagar</button>'
+        + '</div></div>';
+    }).join('');
+    $('listaAg').querySelectorAll('[data-editar]').forEach(function (b) { b.addEventListener('click', function () { abrirForm(itens[+b.getAttribute('data-editar')]); }); });
+    $('listaAg').querySelectorAll('[data-apagar]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var x = itens[+b.getAttribute('data-apagar')];
+        if (!confirm('Apagar o cadastro de ' + x.paciente + '?' + (x.status === 'importado' ? ' (O exame já criado no EndoLaudo continua lá.)' : ''))) return;
+        sb.from('agenda').delete().eq('id', x.id).then(function (r) { if (r.error) alert('Não deu: ' + r.error.message); carregarAgenda(); });
       });
     });
   }
